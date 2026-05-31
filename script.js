@@ -9,62 +9,96 @@ const yrEl = document.getElementById('yr');
 if (yrEl) yrEl.textContent = new Date().getFullYear();
 
 
-/* ── 2. Nav scroll + mobile toggle ─────────────────────────── */
-const nav    = document.getElementById('nav');
-const burger = document.getElementById('navBurger');
-const links  = document.getElementById('navLinks');
+/* ── 2. Nav scroll state ────────────────────────────────────── */
+const nav = document.getElementById('nav');
 
 window.addEventListener('scroll', () => {
   nav.classList.toggle('scrolled', window.scrollY > 50);
 }, { passive: true });
 
+
+/* ── 3. Mobile menu ─────────────────────────────────────────────
+   Uses a separate overlay div for reliable cross-browser behavior.
+   Tested on iOS Safari and Android Chrome.
+────────────────────────────────────────────────────────────────── */
+const burger  = document.getElementById('navBurger');
+const overlay = document.getElementById('mobileOverlay');
+const mLinks  = document.getElementById('mobileLinks');
+
+function openMenu() {
+  burger.classList.add('open');
+  burger.setAttribute('aria-expanded', 'true');
+  // Show overlay as flex, then fade in
+  overlay.style.display = 'flex';
+  // Force reflow so transition fires
+  overlay.getBoundingClientRect();
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  // Lock scroll (iOS Safari needs both)
+  document.body.style.overflow   = 'hidden';
+  document.body.style.position   = 'fixed';
+  document.body.style.width      = '100%';
+}
+
+function closeMenu() {
+  burger.classList.remove('open');
+  burger.setAttribute('aria-expanded', 'false');
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  // Restore scroll
+  document.body.style.overflow   = '';
+  document.body.style.position   = '';
+  document.body.style.width      = '';
+  // Hide overlay after transition completes
+  overlay.addEventListener('transitionend', function hide() {
+    overlay.style.display = 'none';
+    overlay.removeEventListener('transitionend', hide);
+  });
+}
+
 burger.addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  burger.classList.toggle('open', open);
-  burger.setAttribute('aria-expanded', open);
-  document.body.style.overflow = open ? 'hidden' : '';
+  if (overlay.classList.contains('open')) {
+    closeMenu();
+  } else {
+    openMenu();
+  }
 });
 
-links.querySelectorAll('a').forEach(a => {
+// Close when a link is tapped
+mLinks.querySelectorAll('a').forEach(a => {
   a.addEventListener('click', () => {
-    nav.classList.remove('open');
-    burger.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+    closeMenu();
   });
 });
 
+// Close on Escape key
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && nav.classList.contains('open')) {
-    nav.classList.remove('open');
-    burger.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
+  if (e.key === 'Escape' && overlay.classList.contains('open')) {
+    closeMenu();
   }
 });
 
 
-/* ── 3. Smooth scroll with nav offset ──────────────────────── */
+/* ── 4. Smooth scroll with nav offset ──────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
+    const id = a.getAttribute('href');
+    if (id === '#') return;
+    const target = document.querySelector(id);
     if (!target) return;
     e.preventDefault();
     const offset = nav.offsetHeight + 8;
-    window.scrollTo({
-      top: target.getBoundingClientRect().top + window.scrollY - offset,
-      behavior: 'smooth'
-    });
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
   });
 });
 
 
-/* ── 4. Scroll reveal ───────────────────────────────────────── */
+/* ── 5. Scroll reveal ───────────────────────────────────────── */
 (function initReveal() {
   [
-    '.featured-wrap', '.featured-caption',
-    '.works-header',  '.sketchbook-header',
-    '.about-inner',   '.contact-inner',
+    '.works-header', '.sketchbook-header',
+    '.about-inner',  '.contact-inner',
   ].forEach(sel => {
     document.querySelectorAll(sel).forEach(el => el.classList.add('will-reveal'));
   });
@@ -87,7 +121,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 })();
 
 
-/* ── 5. Apple-style carousel ────────────────────────────────── */
+/* ── 6. Apple-style carousel ────────────────────────────────── */
 (function initCarousel() {
   const track   = document.getElementById('track');
   const prevBtn = document.getElementById('carouselPrev');
@@ -98,7 +132,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   const cards = Array.from(track.querySelectorAll('.card'));
   if (!cards.length) return;
 
-  // ── Build dots
+  // Build dots
   cards.forEach((_, i) => {
     const dot = document.createElement('button');
     dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
@@ -118,41 +152,26 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     nextBtn.disabled = track.scrollLeft > track.scrollWidth - track.clientWidth - 4;
   }
 
-  /*
-   * scrollToCard — snaps to a card with Apple-style momentum.
-   * Uses scrollLeft assignment inside requestAnimationFrame
-   * so the browser's own scroll engine handles inertia.
-   */
   function scrollToCard(index) {
-    const card      = cards[Math.max(0, Math.min(index, cards.length - 1))];
-    const padLeft   = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-    const cardLeft  = card.offsetLeft - padLeft;
-    track.scrollTo({ left: cardLeft, behavior: 'smooth' });
+    const card    = cards[Math.max(0, Math.min(index, cards.length - 1))];
+    const padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    track.scrollTo({ left: card.offsetLeft - padLeft, behavior: 'smooth' });
   }
 
-  /*
-   * Page by ~80% of visible width — feels like swiping one
-   * "page" at a time, matching Apple carousel UX.
-   */
-  function pageBy(direction) {
-    const pageWidth = track.clientWidth * 0.82;
-    track.scrollBy({ left: direction * pageWidth, behavior: 'smooth' });
+  function pageBy(dir) {
+    track.scrollBy({ left: dir * track.clientWidth * 0.82, behavior: 'smooth' });
   }
 
   prevBtn.addEventListener('click', () => pageBy(-1));
   nextBtn.addEventListener('click', () => pageBy(+1));
 
-  // ── Update dots + buttons on scroll (throttled with rAF)
   let rafId = null;
   track.addEventListener('scroll', () => {
     if (rafId) return;
     rafId = requestAnimationFrame(() => {
       rafId = null;
       updateButtons();
-
-      // Find closest card to left edge
-      const padLeft   = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-      const viewLeft  = track.scrollLeft + padLeft;
+      const padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
       let closest = 0, closestDist = Infinity;
       cards.forEach((card, i) => {
         const dist = Math.abs(card.offsetLeft - padLeft - track.scrollLeft);
@@ -164,74 +183,45 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
   updateButtons();
 
-  // ── Mouse drag-to-scroll (desktop)
-  // Uses pointer events for smoother capture
-  let dragging    = false;
-  let startX      = 0;
-  let startScroll = 0;
-  let velocity    = 0;
-  let lastX       = 0;
-  let lastTime    = 0;
+  // Mouse drag with momentum
+  let dragging = false, startX = 0, startScroll = 0, velocity = 0, lastX = 0, lastTime = 0;
 
   track.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
-    dragging    = true;
-    startX      = e.clientX;
-    startScroll = track.scrollLeft;
-    lastX       = e.clientX;
-    lastTime    = performance.now();
-    velocity    = 0;
+    dragging = true; startX = e.clientX; startScroll = track.scrollLeft;
+    lastX = e.clientX; lastTime = performance.now(); velocity = 0;
     track.setPointerCapture(e.pointerId);
-    track.style.cursor       = 'grabbing';
-    track.style.userSelect   = 'none';
-    track.style.scrollBehavior = 'auto'; // disable smooth during drag
+    track.style.cursor = 'grabbing';
+    track.style.userSelect = 'none';
+    track.style.scrollBehavior = 'auto';
   });
 
   track.addEventListener('pointermove', e => {
     if (!dragging) return;
-    const now  = performance.now();
-    const dx   = e.clientX - lastX;
-    const dt   = now - lastTime || 1;
-
-    velocity   = dx / dt;            // px/ms
-    lastX      = e.clientX;
-    lastTime   = now;
-
+    const now = performance.now();
+    velocity = (e.clientX - lastX) / (now - lastTime || 1);
+    lastX = e.clientX; lastTime = now;
     track.scrollLeft = startScroll - (e.clientX - startX);
   });
 
   function endDrag() {
     if (!dragging) return;
     dragging = false;
-    track.style.cursor       = '';
-    track.style.userSelect   = '';
-    track.style.scrollBehavior = ''; // restore smooth
-
-    /*
-     * Momentum flick — throw the scroll based on final velocity.
-     * Mimics iOS/macOS momentum scrolling on desktop.
-     */
-    const momentum = velocity * 120; // scale px/ms → px
-    if (Math.abs(momentum) > 30) {
-      track.scrollBy({ left: -momentum, behavior: 'smooth' });
+    track.style.cursor = ''; track.style.userSelect = ''; track.style.scrollBehavior = '';
+    if (Math.abs(velocity * 120) > 30) {
+      track.scrollBy({ left: -velocity * 120, behavior: 'smooth' });
     }
   }
 
-  track.addEventListener('pointerup',     endDrag);
+  track.addEventListener('pointerup', endDrag);
   track.addEventListener('pointercancel', endDrag);
-
-  // Prevent accidental link clicks after a drag
   track.addEventListener('click', e => {
     if (Math.abs(track.scrollLeft - startScroll) > 5) e.stopPropagation();
   }, true);
-
 })();
 
 
-/* ── 6. Lightbox ─────────────────────────────────────────────
-   Opens on card click with garnet background (set in CSS).
-   Sketchbook images also open in the lightbox.
-────────────────────────────────────────────────────────────── */
+/* ── 7. Lightbox ─────────────────────────────────────────────── */
 (function initLightbox() {
   const lb      = document.getElementById('lb');
   const lbImg   = document.getElementById('lbImg');
@@ -242,11 +232,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   const lbNext  = document.getElementById('lbNext');
   if (!lb) return;
 
-  // Collect carousel cards + sketchbook images into one unified list
   const carouselCards = Array.from(document.querySelectorAll('.card'));
   const sketchImgs    = Array.from(document.querySelectorAll('.sk-item'));
 
-  // Unified item list — each entry has { src, title, medium }
   const items = [
     ...carouselCards.map(card => ({
       src:    card.querySelector('img').src,
@@ -254,9 +242,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       medium: card.dataset.medium || '',
     })),
     ...sketchImgs.map(img => ({
-      src:    img.src,
-      title:  '',
-      medium: '',
+      src: img.src, title: '', medium: '',
     })),
   ];
 
@@ -265,23 +251,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   function open(index) {
     current = Math.max(0, Math.min(index, items.length - 1));
     const item = items[current];
-
-    // Reset image so transition fires again
-    lbImg.style.opacity   = '0';
+    lbImg.style.opacity = '0';
     lbImg.style.transform = 'scale(0.94) translateZ(0)';
-
-    lbImg.src           = item.src;
-    lbImg.alt           = item.title;
+    lbImg.src = item.src; lbImg.alt = item.title;
     lbTitle.textContent = item.title;
     lbMeta.textContent  = item.medium;
-
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width    = '100%';
     lbClose.focus();
-
-    // Trigger CSS transition on next paint
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      lbImg.style.opacity   = '';
+      lbImg.style.opacity = '';
       lbImg.style.transform = '';
     }));
   }
@@ -289,13 +270,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   function close() {
     lb.classList.remove('open');
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width    = '';
   }
 
   function go(dir) {
     open((current + dir + items.length) % items.length);
   }
 
-  // Attach to carousel cards
   carouselCards.forEach((card, i) => {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
@@ -306,7 +288,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     });
   });
 
-  // Attach to sketchbook images (offset by carousel card count)
   sketchImgs.forEach((img, i) => {
     img.setAttribute('tabindex', '0');
     img.setAttribute('role', 'button');
