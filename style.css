@@ -13,7 +13,7 @@
   --ink:        #1a1814;
   --black:      #0b0a09;
 
-  --garnet:     #6b1a1a;   /* dark red for lightbox background */
+  --garnet:     #5a0f0f;   /* deep dark red for lightbox background */
   --accent:     #c0392b;   /* red dot accent */
 
   /* Pinyon Script — ornate copperplate cursive for hero name only */
@@ -77,12 +77,12 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 }
 
 .nav-name {
-  font-family: var(--f-display);
-  font-weight: 500;
+  font-family: var(--f-cursive);
+  font-weight: 400;
   font-style: normal;
-  font-size: 0.95rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 1.4rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--ink);
 }
 
@@ -437,7 +437,7 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   display: block;
   /* Smooth Apple-like scale transition */
   transition: transform 0.7s var(--ease-spring), filter 0.5s var(--ease-std);
-  filter: brightness(0.88) grayscale(8%);
+  filter: brightness(0.72) grayscale(8%);
   transform: scale(1) translateZ(0);
   will-change: transform;
 }
@@ -577,7 +577,7 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   height: auto;
   border: 2px solid var(--black);
   transition: filter 0.5s var(--ease-spring), transform 0.5s var(--ease-spring);
-  filter: brightness(0.75) grayscale(15%);
+  filter: brightness(0.55) grayscale(20%);
   cursor: pointer;
   will-change: transform;
 }
@@ -722,10 +722,11 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 }
 
 .footer-name {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.3);
+  font-family: var(--f-cursive);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.4rem;
+  color: rgba(255,255,255,0.5);
 }
 
 .footer-copy {
