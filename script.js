@@ -134,8 +134,9 @@
 
     if (track && dotsEl) {
       var cards = Array.prototype.slice.call(track.querySelectorAll('.card'));
+      var barFill = document.getElementById('carouselBarFill');
 
-      /* Build dots */
+      /* Build dots (hidden in CSS, kept for structure) */
       cards.forEach(function (_, i) {
         var dot = document.createElement('button');
         dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
@@ -145,6 +146,14 @@
       });
 
       var dots = Array.prototype.slice.call(dotsEl.querySelectorAll('.carousel-dot'));
+
+      function updateBar() {
+        if (!barFill) return;
+        /* Progress = scrollLeft / (scrollWidth - clientWidth) */
+        var max = track.scrollWidth - track.clientWidth;
+        var pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
+        barFill.style.width = pct + '%';
+      }
 
       function updateDots(index) {
         dots.forEach(function (d, i) {
@@ -182,6 +191,7 @@
         rafId = requestAnimationFrame(function () {
           rafId = null;
           updateButtons();
+          updateBar();
           var padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
           var closest = 0, closestDist = Infinity;
           cards.forEach(function (card, i) {
@@ -193,6 +203,7 @@
       }, { passive: true });
 
       updateButtons();
+      updateBar();
 
       /* Drag to scroll on desktop */
       var dragging = false, startX = 0, startScroll = 0;
