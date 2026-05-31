@@ -6,11 +6,6 @@
   <title>Ivan Ayuso — Works on Paper</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!--
-    Pinyon Script  → ornate copperplate cursive for the hero name
-    Cormorant Garamond → elegant display for headings
-    EB Garamond    → body text
-  -->
   <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -27,10 +22,21 @@
     <li><a href="#about">About</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span>
+  <button class="nav-burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false">
+    <span></span>
+    <span></span>
   </button>
 </nav>
+
+<!-- Mobile menu overlay (separate from nav for z-index control) -->
+<div class="mobile-overlay" id="mobileOverlay" aria-hidden="true">
+  <ul class="mobile-links" id="mobileLinks">
+    <li><a href="#works">Works</a></li>
+    <li><a href="#sketchbook">Sketchbook</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</div>
 
 
 <!-- ═══════════════════════════════════════════
@@ -38,28 +44,19 @@
 ═══════════════════════════════════════════ -->
 <section class="hero" id="top">
   <div class="hero-body">
-
-    <!-- Left: large cursive name -->
     <h1 class="hero-name">Ivan Ayuso</h1>
-
-    <!-- Right: tagline + origin -->
     <div class="hero-right">
       <p class="hero-line">Proyecto mi psique</p>
       <p class="hero-origin">El Paso · Ciudad Juárez</p>
     </div>
-
   </div>
-
-  <!-- Bottom metadata bar -->
   <div class="hero-bar">
     <span>Works on Paper</span>
-    <span>El Paso · Ciudad Juárez</span>
+    <span>2024</span>
   </div>
-
-  <!-- Scroll cue -->
-  <a class="hero-down" href="#featured" aria-label="Scroll down">
+  <a class="hero-down" href="#works" aria-label="Scroll down">
     Scroll
-    <svg width="14" height="22" viewBox="0 0 14 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
       <line x1="7" y1="0" x2="7" y2="17" stroke="currentColor" stroke-width="1"/>
       <polyline points="2,12 7,18 12,12" fill="none" stroke="currentColor" stroke-width="1"/>
     </svg>
@@ -68,42 +65,13 @@
 
 
 <!-- ═══════════════════════════════════════════
-     FEATURED WORK
-     ─ Change src, title, medium, year below
-═══════════════════════════════════════════ -->
-<section class="featured" id="featured">
-  <div class="featured-wrap">
-
-    <figure class="featured-figure" data-orient="portrait">
-      <!-- ← CHANGE src to your featured artwork -->
-      <img
-        src="images/artwork1.jpg"
-        alt="Featured work"
-        class="featured-img"
-        loading="eager"
-      />
-    </figure>
-
-    <div class="featured-caption">
-      <!-- ← UPDATE title, medium, year -->
-      <p class="featured-title">Title of Work</p>
-      <p class="featured-meta">Watercolor &amp; charcoal on paper &ensp;·&ensp; 2024</p>
-      <p class="featured-size">35 × 50 cm</p>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════
      SELECTED WORKS — horizontal carousel
-     ─ To add artworks: copy one <figure class="card">
-       block, paste inside .track, update data-*
-       attributes and the <img> src.
-       data-orient: "portrait" or "landscape"
+     ─ data-orient: "portrait" or "landscape"
+     ─ To add artworks: copy a <figure class="card">
+       block and update src, data-title, data-year,
+       data-medium, and data-orient.
 ═══════════════════════════════════════════ -->
 <section class="works" id="works">
-
   <header class="works-header">
     <span class="section-eyebrow">Selected Works</span>
   </header>
@@ -111,86 +79,156 @@
   <div class="carousel-outer" id="carousel">
     <div class="track" id="track">
 
-      <!-- ARTWORK 1 -->
-      <figure class="card" data-orient="portrait"
-        data-title="Title One"
+      <!-- ARTWORK 1 — Bull (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="El Toro"
         data-year="2024"
-        data-medium="Watercolor &amp; charcoal on paper">
+        data-medium="Acrílico y carbón sobre papel">
         <div class="card-img-wrap">
-          <img src="images/artwork1.jpg" alt="Title One" loading="lazy" />
+          <img src="images/artwork1.jpg" alt="El Toro" loading="lazy" />
         </div>
         <figcaption class="card-cap">
-          <span class="card-title">Title One</span>
+          <span class="card-title">El Toro</span>
           <span class="card-year">2024</span>
         </figcaption>
       </figure>
 
-      <!-- ARTWORK 2 -->
-      <figure class="card" data-orient="landscape"
-        data-title="Title Two"
+      <!-- ARTWORK 2 — Woman at door (portrait) -->
+      <figure class="card" data-orient="portrait"
+        data-title="La Puerta"
         data-year="2024"
-        data-medium="Ink &amp; graphite on paper">
+        data-medium="Acuarela y gouache sobre papel">
         <div class="card-img-wrap">
-          <img src="images/artwork2.jpg" alt="Title Two" loading="lazy" />
+          <img src="images/artwork2.jpg" alt="La Puerta" loading="lazy" />
         </div>
         <figcaption class="card-cap">
-          <span class="card-title">Title Two</span>
+          <span class="card-title">La Puerta</span>
           <span class="card-year">2024</span>
         </figcaption>
       </figure>
 
-      <!-- ARTWORK 3 -->
-      <figure class="card" data-orient="portrait"
-        data-title="Title Three"
-        data-year="2023"
-        data-medium="Watercolor &amp; pastel on paper">
-        <div class="card-img-wrap">
-          <img src="images/artwork3.jpg" alt="Title Three" loading="lazy" />
-        </div>
-        <figcaption class="card-cap">
-          <span class="card-title">Title Three</span>
-          <span class="card-year">2023</span>
-        </figcaption>
-      </figure>
-
-      <!-- ARTWORK 4 -->
+      <!-- ARTWORK 3 — Rodeo with color (landscape) -->
       <figure class="card" data-orient="landscape"
-        data-title="Title Four"
-        data-year="2023"
-        data-medium="Charcoal &amp; watercolor on paper">
+        data-title="Charrería"
+        data-year="2024"
+        data-medium="Acuarela y grafito sobre papel">
         <div class="card-img-wrap">
-          <img src="images/artwork4.jpg" alt="Title Four" loading="lazy" />
+          <img src="images/artwork3.jpg" alt="Charrería" loading="lazy" />
         </div>
         <figcaption class="card-cap">
-          <span class="card-title">Title Four</span>
+          <span class="card-title">Charrería</span>
+          <span class="card-year">2024</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 4 — Rider in storm (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="La Tormenta"
+        data-year="2023"
+        data-medium="Carbón y pastel sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork4.jpg" alt="La Tormenta" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">La Tormenta</span>
           <span class="card-year">2023</span>
         </figcaption>
       </figure>
 
-      <!-- ARTWORK 5 -->
-      <figure class="card" data-orient="portrait"
-        data-title="Title Five"
+      <!-- ARTWORK 5 — Ballpoint horse (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="Estudio de Movimiento"
+        data-year="2023"
+        data-medium="Bolígrafo sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork5.jpg" alt="Estudio de Movimiento" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">Estudio de Movimiento</span>
+          <span class="card-year">2023</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 6 — Ballerinas (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="Ensayo"
+        data-year="2023"
+        data-medium="Acuarela y gouache sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork6.jpg" alt="Ensayo" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">Ensayo</span>
+          <span class="card-year">2023</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 7 — Rider mountains (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="Sierra"
+        data-year="2023"
+        data-medium="Carbón y pastel sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork7.jpg" alt="Sierra" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">Sierra</span>
+          <span class="card-year">2023</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 8 — Woman by lake (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="El Lago"
         data-year="2022"
-        data-medium="Watercolor &amp; ink on paper">
+        data-medium="Acuarela y gouache sobre papel">
         <div class="card-img-wrap">
-          <img src="images/artwork5.jpg" alt="Title Five" loading="lazy" />
+          <img src="images/artwork8.jpg" alt="El Lago" loading="lazy" />
         </div>
         <figcaption class="card-cap">
-          <span class="card-title">Title Five</span>
+          <span class="card-title">El Lago</span>
           <span class="card-year">2022</span>
         </figcaption>
       </figure>
 
-      <!-- ARTWORK 6 -->
+      <!-- ARTWORK 9 — Dancer (portrait) -->
       <figure class="card" data-orient="portrait"
-        data-title="Title Six"
+        data-title="La Danza"
         data-year="2022"
-        data-medium="Graphite &amp; watercolor on paper">
+        data-medium="Acuarela y carbón sobre papel">
         <div class="card-img-wrap">
-          <img src="images/artwork6.jpg" alt="Title Six" loading="lazy" />
+          <img src="images/artwork9.jpg" alt="La Danza" loading="lazy" />
         </div>
         <figcaption class="card-cap">
-          <span class="card-title">Title Six</span>
+          <span class="card-title">La Danza</span>
+          <span class="card-year">2022</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 10 — Three cowboys (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="Los Tres"
+        data-year="2022"
+        data-medium="Acuarela y tinta sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork10.jpg" alt="Los Tres" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">Los Tres</span>
+          <span class="card-year">2022</span>
+        </figcaption>
+      </figure>
+
+      <!-- ARTWORK 11 — Rider with rifle (landscape) -->
+      <figure class="card" data-orient="landscape"
+        data-title="El Jinete"
+        data-year="2022"
+        data-medium="Bolígrafo sobre papel">
+        <div class="card-img-wrap">
+          <img src="images/artwork11.jpg" alt="El Jinete" loading="lazy" />
+        </div>
+        <figcaption class="card-cap">
+          <span class="card-title">El Jinete</span>
           <span class="card-year">2022</span>
         </figcaption>
       </figure>
@@ -199,21 +237,20 @@
         ADD MORE ARTWORKS HERE — copy this block:
 
         <figure class="card" data-orient="portrait"
-          data-title="Your Title"
+          data-title="Tu Título"
           data-year="2024"
-          data-medium="Your medium">
+          data-medium="Tu técnica">
           <div class="card-img-wrap">
-            <img src="images/artworkN.jpg" alt="Your Title" loading="lazy" />
+            <img src="images/artworkN.jpg" alt="Tu Título" loading="lazy" />
           </div>
           <figcaption class="card-cap">
-            <span class="card-title">Your Title</span>
+            <span class="card-title">Tu Título</span>
             <span class="card-year">2024</span>
           </figcaption>
         </figure>
       -->
 
     </div><!-- /track -->
-
     <div class="carousel-fade-left"></div>
     <div class="carousel-fade-right"></div>
   </div>
@@ -225,22 +262,18 @@
       <button class="carousel-btn" id="carouselNext" aria-label="Next">→</button>
     </div>
   </div>
-
 </section>
 
 
 <!-- ═══════════════════════════════════════════
      SKETCHBOOK
-     ─ Add images inside .sketchbook-scatter.
-       Cycle classes s1–s9 for visual variety.
+     ─ Add images inside .sketchbook-scatter
 ═══════════════════════════════════════════ -->
 <section class="sketchbook" id="sketchbook">
-
   <header class="sketchbook-header">
     <span class="section-eyebrow">Sketchbook</span>
     <p class="sketchbook-note">Pages, studies, unfinished thoughts.</p>
   </header>
-
   <div class="sketchbook-scatter">
     <img src="images/sketch1.jpg" alt="" class="sk-item s1" loading="lazy" />
     <img src="images/sketch2.jpg" alt="" class="sk-item s2" loading="lazy" />
@@ -250,20 +283,17 @@
     <img src="images/sketch6.jpg" alt="" class="sk-item s6" loading="lazy" />
     <!-- ADD MORE SKETCHBOOK IMAGES HERE -->
   </div>
-
 </section>
 
 
 <!-- ═══════════════════════════════════════════
-     ABOUT
+     ABOUT — ochre background
 ═══════════════════════════════════════════ -->
 <section class="about" id="about">
   <div class="about-inner">
-
     <div class="about-label">
       <span class="section-eyebrow">About</span>
     </div>
-
     <div class="about-text">
       <p>
         Me crié en Ciudad Juárez tras nacer en El Paso, Texas, por lo que vivo rodeado
@@ -284,30 +314,29 @@
         agradecido de que te tomes un momento para contemplar mi obra.
       </p>
     </div>
-
   </div>
 </section>
 
 
 <!-- ═══════════════════════════════════════════
      CONTACT
+     Email:     ivanayus0o@outlook.com
+     Instagram: @ayus0o
+     (zeros are literal "0" characters, not "O")
 ═══════════════════════════════════════════ -->
 <section class="contact" id="contact">
   <div class="contact-inner">
-
     <span class="section-eyebrow">Contact</span>
-
     <div class="contact-links">
       <a href="mailto:ivanayus0o@outlook.com" class="contact-link">
         <span class="contact-label">Email</span>
-        <span class="contact-value">ivanayus0o@outlook.com</span>
+        <span class="contact-value">ivanayus&#48;&#48;@outlook.com</span>
       </a>
       <a href="https://instagram.com/ayus0o" target="_blank" rel="noopener noreferrer" class="contact-link">
         <span class="contact-label">Instagram</span>
-        <span class="contact-value">@ayus0o</span>
+        <span class="contact-value">@ayus&#48;&#48;</span>
       </a>
     </div>
-
   </div>
 </section>
 
@@ -322,7 +351,7 @@
 
 
 <!-- ═══════════════════════════════════════════
-     LIGHTBOX — no edits needed
+     LIGHTBOX
 ═══════════════════════════════════════════ -->
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="View artwork">
   <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
@@ -331,13 +360,12 @@
   <div class="lb-stage">
     <img class="lb-img" id="lbImg" src="" alt="" />
   </div>
-  <div class="lb-caption" id="lbCaption">
+  <div class="lb-caption">
     <p class="lb-title" id="lbTitle"></p>
     <p class="lb-meta"  id="lbMeta"></p>
     <p class="lb-size">35 × 50 cm</p>
   </div>
 </div>
-
 
 <script src="script.js"></script>
 </body>
