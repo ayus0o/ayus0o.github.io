@@ -61,16 +61,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 /* ── 4. Scroll reveal ───────────────────────────────────────── */
 (function initReveal() {
-  const els = [
-    '.featured-wrap',
-    '.featured-caption',
-    '.works-header',
-    '.sketchbook-header',
-    '.about-inner',
-    '.contact-inner',
-  ];
-
-  els.forEach(sel => {
+  [
+    '.featured-wrap', '.featured-caption',
+    '.works-header',  '.sketchbook-header',
+    '.about-inner',   '.contact-inner',
+  ].forEach(sel => {
     document.querySelectorAll(sel).forEach(el => el.classList.add('will-reveal'));
   });
 
@@ -92,19 +87,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 })();
 
 
-/* ── 5. Carousel ────────────────────────────────────────────── */
+/* ── 5. Apple-style carousel ────────────────────────────────── */
 (function initCarousel() {
   const track   = document.getElementById('track');
   const prevBtn = document.getElementById('carouselPrev');
   const nextBtn = document.getElementById('carouselNext');
   const dotsEl  = document.getElementById('carouselDots');
-
   if (!track) return;
 
   const cards = Array.from(track.querySelectorAll('.card'));
   if (!cards.length) return;
 
-  // Build dots
+  // ── Build dots
   cards.forEach((_, i) => {
     const dot = document.createElement('button');
     dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
@@ -120,59 +114,124 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   }
 
   function updateButtons() {
-    prevBtn.disabled = track.scrollLeft <= 4;
-    nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;
+    prevBtn.disabled = track.scrollLeft < 4;
+    nextBtn.disabled = track.scrollLeft > track.scrollWidth - track.clientWidth - 4;
   }
 
+  /*
+   * scrollToCard — snaps to a card with Apple-style momentum.
+   * Uses scrollLeft assignment inside requestAnimationFrame
+   * so the browser's own scroll engine handles inertia.
+   */
   function scrollToCard(index) {
-    const card     = cards[index];
-    const trackRect = track.getBoundingClientRect();
-    const cardRect  = card.getBoundingClientRect();
-    const padLeft   = parseFloat(getComputedStyle(track).paddingLeft);
-    track.scrollBy({ left: cardRect.left - trackRect.left - padLeft, behavior: 'smooth' });
+    const card      = cards[Math.max(0, Math.min(index, cards.length - 1))];
+    const padLeft   = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    const cardLeft  = card.offsetLeft - padLeft;
+    track.scrollTo({ left: cardLeft, behavior: 'smooth' });
   }
 
-  prevBtn.addEventListener('click', () => {
-    track.scrollBy({ left: -track.clientWidth * 0.7, behavior: 'smooth' });
-  });
+  /*
+   * Page by ~80% of visible width — feels like swiping one
+   * "page" at a time, matching Apple carousel UX.
+   */
+  function pageBy(direction) {
+    const pageWidth = track.clientWidth * 0.82;
+    track.scrollBy({ left: direction * pageWidth, behavior: 'smooth' });
+  }
 
-  nextBtn.addEventListener('click', () => {
-    track.scrollBy({ left: track.clientWidth * 0.7, behavior: 'smooth' });
-  });
+  prevBtn.addEventListener('click', () => pageBy(-1));
+  nextBtn.addEventListener('click', () => pageBy(+1));
 
+  // ── Update dots + buttons on scroll (throttled with rAF)
+  let rafId = null;
   track.addEventListener('scroll', () => {
-    updateButtons();
-    const trackRect = track.getBoundingClientRect();
-    let closest = 0, closestDist = Infinity;
-    cards.forEach((card, i) => {
-      const dist = Math.abs(card.getBoundingClientRect().left - trackRect.left);
-      if (dist < closestDist) { closestDist = dist; closest = i; }
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      updateButtons();
+
+      // Find closest card to left edge
+      const padLeft   = parseFloat(getComputedStyle(track).paddingLeft) || 0;
+      const viewLeft  = track.scrollLeft + padLeft;
+      let closest = 0, closestDist = Infinity;
+      cards.forEach((card, i) => {
+        const dist = Math.abs(card.offsetLeft - padLeft - track.scrollLeft);
+        if (dist < closestDist) { closestDist = dist; closest = i; }
+      });
+      updateDots(closest);
     });
-    updateDots(closest);
   }, { passive: true });
 
   updateButtons();
 
-  // Drag to scroll
-  let dragging = false, startX = 0, startScroll = 0;
-  track.addEventListener('mousedown', e => {
-    dragging = true;
-    startX = e.pageX - track.offsetLeft;
+  // ── Mouse drag-to-scroll (desktop)
+  // Uses pointer events for smoother capture
+  let dragging    = false;
+  let startX      = 0;
+  let startScroll = 0;
+  let velocity    = 0;
+  let lastX       = 0;
+  let lastTime    = 0;
+
+  track.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    dragging    = true;
+    startX      = e.clientX;
     startScroll = track.scrollLeft;
-    track.style.userSelect = 'none';
+    lastX       = e.clientX;
+    lastTime    = performance.now();
+    velocity    = 0;
+    track.setPointerCapture(e.pointerId);
+    track.style.cursor       = 'grabbing';
+    track.style.userSelect   = 'none';
+    track.style.scrollBehavior = 'auto'; // disable smooth during drag
   });
-  document.addEventListener('mousemove', e => {
+
+  track.addEventListener('pointermove', e => {
     if (!dragging) return;
-    track.scrollLeft = startScroll - (e.pageX - track.offsetLeft - startX);
+    const now  = performance.now();
+    const dx   = e.clientX - lastX;
+    const dt   = now - lastTime || 1;
+
+    velocity   = dx / dt;            // px/ms
+    lastX      = e.clientX;
+    lastTime   = now;
+
+    track.scrollLeft = startScroll - (e.clientX - startX);
   });
-  document.addEventListener('mouseup', () => {
+
+  function endDrag() {
+    if (!dragging) return;
     dragging = false;
-    track.style.userSelect = '';
-  });
+    track.style.cursor       = '';
+    track.style.userSelect   = '';
+    track.style.scrollBehavior = ''; // restore smooth
+
+    /*
+     * Momentum flick — throw the scroll based on final velocity.
+     * Mimics iOS/macOS momentum scrolling on desktop.
+     */
+    const momentum = velocity * 120; // scale px/ms → px
+    if (Math.abs(momentum) > 30) {
+      track.scrollBy({ left: -momentum, behavior: 'smooth' });
+    }
+  }
+
+  track.addEventListener('pointerup',     endDrag);
+  track.addEventListener('pointercancel', endDrag);
+
+  // Prevent accidental link clicks after a drag
+  track.addEventListener('click', e => {
+    if (Math.abs(track.scrollLeft - startScroll) > 5) e.stopPropagation();
+  }, true);
+
 })();
 
 
-/* ── 6. Lightbox ────────────────────────────────────────────── */
+/* ── 6. Lightbox ─────────────────────────────────────────────
+   Opens on card click with garnet background (set in CSS).
+   Sketchbook images also open in the lightbox.
+────────────────────────────────────────────────────────────── */
 (function initLightbox() {
   const lb      = document.getElementById('lb');
   const lbImg   = document.getElementById('lbImg');
@@ -181,26 +240,48 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   const lbClose = document.getElementById('lbClose');
   const lbPrev  = document.getElementById('lbPrev');
   const lbNext  = document.getElementById('lbNext');
-
   if (!lb) return;
 
-  const cards = Array.from(document.querySelectorAll('.card'));
+  // Collect carousel cards + sketchbook images into one unified list
+  const carouselCards = Array.from(document.querySelectorAll('.card'));
+  const sketchImgs    = Array.from(document.querySelectorAll('.sk-item'));
+
+  // Unified item list — each entry has { src, title, medium }
+  const items = [
+    ...carouselCards.map(card => ({
+      src:    card.querySelector('img').src,
+      title:  card.dataset.title  || '',
+      medium: card.dataset.medium || '',
+    })),
+    ...sketchImgs.map(img => ({
+      src:    img.src,
+      title:  '',
+      medium: '',
+    })),
+  ];
+
   let current = 0;
 
   function open(index) {
-    current = index;
-    const card = cards[index];
-    lbImg.style.opacity = '0';
-    lbImg.style.transform = 'scale(0.96)';
-    lbImg.src           = card.querySelector('img').src;
-    lbImg.alt           = card.dataset.title || '';
-    lbTitle.textContent = card.dataset.title  || '';
-    lbMeta.textContent  = card.dataset.medium || '';
+    current = Math.max(0, Math.min(index, items.length - 1));
+    const item = items[current];
+
+    // Reset image so transition fires again
+    lbImg.style.opacity   = '0';
+    lbImg.style.transform = 'scale(0.94) translateZ(0)';
+
+    lbImg.src           = item.src;
+    lbImg.alt           = item.title;
+    lbTitle.textContent = item.title;
+    lbMeta.textContent  = item.medium;
+
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
     lbClose.focus();
+
+    // Trigger CSS transition on next paint
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      lbImg.style.opacity = '';
+      lbImg.style.opacity   = '';
       lbImg.style.transform = '';
     }));
   }
@@ -211,16 +292,28 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   }
 
   function go(dir) {
-    open((current + dir + cards.length) % cards.length);
+    open((current + dir + items.length) % items.length);
   }
 
-  cards.forEach((card, i) => {
+  // Attach to carousel cards
+  carouselCards.forEach((card, i) => {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-label', `Ver ${card.dataset.title || 'obra'}`);
     card.addEventListener('click', () => open(i));
     card.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); }
+    });
+  });
+
+  // Attach to sketchbook images (offset by carousel card count)
+  sketchImgs.forEach((img, i) => {
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'Ver boceto');
+    img.addEventListener('click', () => open(carouselCards.length + i));
+    img.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(carouselCards.length + i); }
     });
   });
 
@@ -236,7 +329,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (e.key === 'ArrowRight') go(+1);
   });
 
-  // Swipe
+  // Touch swipe
   let tx = 0;
   lb.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
   lb.addEventListener('touchend',   e => {
