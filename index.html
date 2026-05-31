@@ -253,14 +253,19 @@
     </div><!-- /track -->
     <div class="carousel-fade-left"></div>
     <div class="carousel-fade-right"></div>
+
+    <!-- Side arrows — positioned absolute inside carousel-outer -->
+    <button class="carousel-arrow carousel-arrow--prev" id="carouselPrev" aria-label="Previous">&#8592;</button>
+    <button class="carousel-arrow carousel-arrow--next" id="carouselNext" aria-label="Next">&#8594;</button>
   </div>
 
+  <!-- Progress bar below the carousel -->
   <div class="carousel-nav">
-    <div class="carousel-dots" id="carouselDots"></div>
-    <div class="carousel-btns">
-      <button class="carousel-btn" id="carouselPrev" aria-label="Previous">←</button>
-      <button class="carousel-btn" id="carouselNext" aria-label="Next">→</button>
+    <div class="carousel-bar-track">
+      <div class="carousel-bar-fill" id="carouselBarFill"></div>
     </div>
+    <div class="carousel-dots" id="carouselDots"></div><!-- kept for JS compat, hidden in CSS -->
+    <div class="carousel-btns"></div><!-- kept for JS compat, hidden in CSS -->
   </div>
 </section>
 
