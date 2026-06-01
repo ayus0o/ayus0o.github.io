@@ -1,372 +1,329 @@
-/* ═══════════════════════════════════════════════════════════════
-   IVAN AYUSO — script.js
-   ═══════════════════════════════════════════════════════════════ */
+/*  IVAN AYUSO — script.js
+    Escrito para máxima compatibilidad móvil:
+    iOS Safari 12+, Android Chrome, desktop.
+    Sin arrow functions. Sin const/let. Sin pointer events.
+    Touch events nativos para swipe en móvil.
+*/
 
+/* ─── 1. AÑO EN FOOTER ─────────────────────────────────────── */
+var yrEl = document.getElementById('yr');
+if (yrEl) { yrEl.textContent = new Date().getFullYear(); }
+
+
+/* ─── 2. NAV SCROLL ─────────────────────────────────────────── */
+var nav = document.getElementById('nav');
+window.addEventListener('scroll', function () {
+  if (window.pageYOffset > 50) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+}, { passive: true });
+
+
+/* ─── 3. MENÚ HAMBURGUESA ────────────────────────────────────── */
+var burger  = document.getElementById('navBurger');
+var overlay = document.getElementById('mobileOverlay');
+var mLinks  = document.getElementById('mobileLinks');
+var menuOpen = false;
+
+function openMenu() {
+  menuOpen = true;
+  burger.classList.add('open');
+  overlay.style.display = 'flex';
+  /* void para forzar reflow — necesario para que la transición CSS funcione */
+  void overlay.offsetWidth;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  menuOpen = false;
+  burger.classList.remove('open');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  /* esconder después de que termine la transición */
+  setTimeout(function () {
+    if (!menuOpen) { overlay.style.display = 'none'; }
+  }, 400);
+}
+
+/* touchstart: respuesta inmediata en iOS sin delay de 300ms */
+burger.addEventListener('touchstart', function (e) {
+  e.preventDefault();
+  if (menuOpen) { closeMenu(); } else { openMenu(); }
+}, { passive: false });
+
+/* click: fallback para desktop */
+burger.addEventListener('click', function () {
+  if (menuOpen) { closeMenu(); } else { openMenu(); }
+});
+
+/* Cerrar al tocar un link */
+if (mLinks) {
+  var mlA = mLinks.querySelectorAll('a');
+  for (var i = 0; i < mlA.length; i++) {
+    mlA[i].addEventListener('touchstart', function () { closeMenu(); }, { passive: true });
+    mlA[i].addEventListener('click',      function () { closeMenu(); });
+  }
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && menuOpen) { closeMenu(); }
+});
+
+
+/* ─── 4. SMOOTH SCROLL ──────────────────────────────────────── */
+var anchorEls = document.querySelectorAll('a[href^="#"]');
+for (var ai = 0; ai < anchorEls.length; ai++) {
+  anchorEls[ai].addEventListener('click', function (e) {
+    var id = this.getAttribute('href');
+    if (!id || id === '#') { return; }
+    var target = document.querySelector(id);
+    if (!target) { return; }
+    e.preventDefault();
+    var offset = nav ? nav.offsetHeight + 8 : 8;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  });
+}
+
+
+/* ─── 5. SCROLL REVEAL ──────────────────────────────────────── */
 (function () {
-  'use strict';
-
-  /* ── 1. Footer year ───────────────────────────────────────── */
-  var yrEl = document.getElementById('yr');
-  if (yrEl) yrEl.textContent = new Date().getFullYear();
-
-
-  /* ── 2. Nav scroll ────────────────────────────────────────── */
-  var nav = document.getElementById('nav');
-
-  window.addEventListener('scroll', function () {
-    if (window.scrollY > 50) {
-      nav.classList.add('scrolled');
-    } else {
-      nav.classList.remove('scrolled');
+  var sels = ['.works-header','.sketchbook-header','.about-inner','.contact-inner'];
+  for (var i = 0; i < sels.length; i++) {
+    var found = document.querySelectorAll(sels[i]);
+    for (var j = 0; j < found.length; j++) { found[j].classList.add('will-reveal'); }
+  }
+  var sk = document.querySelectorAll('.sk-item');
+  for (var k = 0; k < sk.length; k++) {
+    sk[k].classList.add('will-reveal');
+    sk[k].style.transitionDelay = ((k % 6) * 0.07) + 's';
+  }
+  if (!window.IntersectionObserver) {
+    var all = document.querySelectorAll('.will-reveal');
+    for (var m = 0; m < all.length; m++) { all[m].classList.add('revealed'); }
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    for (var n = 0; n < entries.length; n++) {
+      if (entries[n].isIntersecting) {
+        entries[n].target.classList.add('revealed');
+        io.unobserve(entries[n].target);
+      }
     }
-  }, { passive: true });
+  }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
+  var rv = document.querySelectorAll('.will-reveal');
+  for (var r = 0; r < rv.length; r++) { io.observe(rv[r]); }
+}());
 
 
-  /* ── 3. Mobile menu ───────────────────────────────────────── */
-  var burger  = document.getElementById('navBurger');
-  var overlay = document.getElementById('mobileOverlay');
-  var mLinks  = document.getElementById('mobileLinks');
-  var menuOpen = false;
+/* ─── 6. CARRUSEL ───────────────────────────────────────────────
+   El navegador maneja el swipe nativo en móvil gracias a
+   overflow-x: scroll + scroll-snap. Nosotros solo manejamos:
+   • barra de progreso
+   • botones de flecha
+   • drag con mouse en desktop
+────────────────────────────────────────────────────────────── */
+(function () {
+  var track   = document.getElementById('track');
+  var prevBtn = document.getElementById('carouselPrev');
+  var nextBtn = document.getElementById('carouselNext');
+  var barFill = document.getElementById('carouselBarFill');
+  if (!track) { return; }
 
-  function openMenu() {
-    menuOpen = true;
-    burger.classList.add('open');
-    burger.setAttribute('aria-expanded', 'true');
-    overlay.style.display = 'flex';
-    /* tiny timeout so display:flex is painted before opacity transition */
-    setTimeout(function () {
-      overlay.classList.add('open');
-    }, 10);
-    overlay.setAttribute('aria-hidden', 'false');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+  function updateBar() {
+    if (!barFill) { return; }
+    var max = track.scrollWidth - track.clientWidth;
+    barFill.style.width = (max > 0 ? (track.scrollLeft / max) * 100 : 0) + '%';
   }
 
-  function closeMenu() {
-    menuOpen = false;
-    burger.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
-    /* hide after fade-out transition (350ms) */
-    setTimeout(function () {
-      if (!menuOpen) overlay.style.display = 'none';
-    }, 380);
+  function updateBtns() {
+    if (prevBtn) { prevBtn.disabled = track.scrollLeft < 4; }
+    if (nextBtn) { nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4; }
   }
 
-  if (burger) {
-    burger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (menuOpen) { closeMenu(); } else { openMenu(); }
+  /* Scroll listener — rAF throttled */
+  var raf = null;
+  function onTrackScroll() {
+    if (raf) { return; }
+    raf = requestAnimationFrame(function () {
+      raf = null;
+      updateBar();
+      updateBtns();
     });
   }
+  track.addEventListener('scroll', onTrackScroll, { passive: true });
 
-  if (mLinks) {
-    mLinks.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () {
-        closeMenu();
+  /* Flechas — click y touchstart */
+  function attachArrow(btn, dir) {
+    if (!btn) { return; }
+    function fire(e) {
+      if (e.type === 'touchstart') { e.preventDefault(); }
+      track.scrollBy({ left: dir * track.clientWidth * 0.82, behavior: 'smooth' });
+    }
+    btn.addEventListener('touchstart', fire, { passive: false });
+    btn.addEventListener('click', fire);
+  }
+  attachArrow(prevBtn, -1);
+  attachArrow(nextBtn,  1);
+
+  updateBar();
+  updateBtns();
+
+  /* Drag con mouse (solo desktop) */
+  var dragging = false;
+  var mx0 = 0, sl0 = 0, mdx = 0;
+
+  track.addEventListener('mousedown', function (e) {
+    if (e.button !== 0) { return; }
+    dragging = true; mx0 = e.clientX; sl0 = track.scrollLeft; mdx = 0;
+    track.style.cursor = 'grabbing';
+    track.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', function (e) {
+    if (!dragging) { return; }
+    mdx = e.clientX - mx0;
+    track.scrollLeft = sl0 - mdx;
+  });
+  document.addEventListener('mouseup', function () {
+    if (!dragging) { return; }
+    dragging = false;
+    track.style.cursor = '';
+    track.style.userSelect = '';
+  });
+  /* Evitar que drag abra lightbox */
+  track.addEventListener('click', function (e) {
+    if (Math.abs(mdx) > 8) { e.stopPropagation(); mdx = 0; }
+  }, true);
+}());
+
+
+/* ─── 7. LIGHTBOX ───────────────────────────────────────────────
+   Abre al tap/click en .card o .sk-item.
+   Swipe horizontal para ir a la imagen siguiente/anterior.
+   Distingue tap de swipe para no abrir accidentalmente.
+────────────────────────────────────────────────────────────── */
+(function () {
+  var lb         = document.getElementById('lb');
+  var lbImg      = document.getElementById('lbImg');
+  var lbTitleEl  = document.getElementById('lbTitle');
+  var lbMetaEl   = document.getElementById('lbMeta');
+  var lbCloseBtn = document.getElementById('lbClose');
+  var lbPrevBtn  = document.getElementById('lbPrev');
+  var lbNextBtn  = document.getElementById('lbNext');
+  if (!lb || !lbImg) { return; }
+
+  /* Construir lista de items */
+  var items = [];
+  var cardEls   = document.querySelectorAll('.card');
+  var sketchEls = document.querySelectorAll('.sk-item');
+
+  for (var ci = 0; ci < cardEls.length; ci++) {
+    var cimg = cardEls[ci].querySelector('img');
+    items.push({
+      src:    cimg ? cimg.src : '',
+      title:  cardEls[ci].getAttribute('data-title')  || '',
+      medium: cardEls[ci].getAttribute('data-medium') || ''
+    });
+  }
+  for (var si = 0; si < sketchEls.length; si++) {
+    items.push({ src: sketchEls[si].src, title: '', medium: '' });
+  }
+
+  var current = 0;
+
+  function lbOpen(index) {
+    current = Math.max(0, Math.min(index, items.length - 1));
+    var item = items[current];
+    lbImg.style.opacity   = '0';
+    lbImg.style.transform = 'scale(0.94)';
+    lbImg.src = item.src;
+    lbImg.alt = item.title;
+    if (lbTitleEl) { lbTitleEl.textContent = item.title; }
+    if (lbMetaEl)  { lbMetaEl.textContent  = item.medium; }
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        lbImg.style.opacity   = '';
+        lbImg.style.transform = '';
       });
     });
   }
+
+  function lbClose() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  }
+
+  function lbGo(dir) { lbOpen((current + dir + items.length) % items.length); }
+
+  /* ── Attach a las cards ──
+     Usamos touchend para detectar tap limpio vs swipe en móvil.
+     swipeDx guarda el desplazamiento horizontal del toque.
+  ── */
+  var swipeDx = 0;
+
+  function attachItem(el, index) {
+    el.style.cursor = 'pointer';
+
+    el.addEventListener('touchstart', function (e) {
+      swipeDx = e.touches[0].clientX;
+    }, { passive: true });
+
+    el.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].clientX - swipeDx;
+      /* Solo abrir si no fue un swipe (< 12px de movimiento) */
+      if (Math.abs(dx) < 12) {
+        e.preventDefault();
+        lbOpen(index);
+      }
+    }, { passive: false });
+
+    /* click para desktop */
+    el.addEventListener('click', function () { lbOpen(index); });
+  }
+
+  for (var cai = 0; cai < cardEls.length; cai++) {
+    attachItem(cardEls[cai], cai);
+  }
+  var skOff = cardEls.length;
+  for (var sai = 0; sai < sketchEls.length; sai++) {
+    attachItem(sketchEls[sai], skOff + sai);
+  }
+
+  /* ── Controles del lightbox ── */
+  function attachLbBtn(btn, fn) {
+    if (!btn) { return; }
+    btn.addEventListener('touchstart', function (e) { e.preventDefault(); fn(); }, { passive: false });
+    btn.addEventListener('click', fn);
+  }
+  attachLbBtn(lbCloseBtn, lbClose);
+  attachLbBtn(lbPrevBtn,  function () { lbGo(-1); });
+  attachLbBtn(lbNextBtn,  function () { lbGo(+1); });
+
+  lb.addEventListener('click', function (e) { if (e.target === lb) { lbClose(); } });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && menuOpen) closeMenu();
+    if (!lb.classList.contains('open')) { return; }
+    if (e.key === 'Escape')     { lbClose(); }
+    if (e.key === 'ArrowLeft')  { lbGo(-1); }
+    if (e.key === 'ArrowRight') { lbGo(+1); }
   });
 
-
-  /* ── 4. Smooth anchor scroll ──────────────────────────────── */
-  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-    a.addEventListener('click', function (e) {
-      var id = a.getAttribute('href');
-      if (!id || id === '#') return;
-      var target = document.querySelector(id);
-      if (!target) return;
-      e.preventDefault();
-      var offset = (nav ? nav.offsetHeight : 0) + 8;
-      var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({ top: top, behavior: 'smooth' });
-    });
-  });
-
-
-  /* ── 5. Scroll reveal ─────────────────────────────────────── */
-  try {
-    var revealEls = document.querySelectorAll(
-      '.works-header, .sketchbook-header, .about-inner, .contact-inner'
-    );
-    revealEls.forEach(function (el) { el.classList.add('will-reveal'); });
-
-    document.querySelectorAll('.sk-item').forEach(function (el, i) {
-      el.classList.add('will-reveal');
-      el.style.transitionDelay = (i % 6) * 0.07 + 's';
-    });
-
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
-
-      document.querySelectorAll('.will-reveal').forEach(function (el) {
-        io.observe(el);
-      });
-    } else {
-      /* Fallback for old browsers — just show everything */
-      document.querySelectorAll('.will-reveal').forEach(function (el) {
-        el.classList.add('revealed');
-      });
-    }
-  } catch (e) { /* reveal is non-critical, swallow errors */ }
-
-
-  /* ── 6. Carousel ──────────────────────────────────────────── */
-  try {
-    var track   = document.getElementById('track');
-    var prevBtn = document.getElementById('carouselPrev');
-    var nextBtn = document.getElementById('carouselNext');
-    var dotsEl  = document.getElementById('carouselDots');
-
-    if (track && dotsEl) {
-      var cards = Array.prototype.slice.call(track.querySelectorAll('.card'));
-      var barFill = document.getElementById('carouselBarFill');
-
-      /* Build dots (hidden in CSS, kept for structure) */
-      cards.forEach(function (_, i) {
-        var dot = document.createElement('button');
-        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Artwork ' + (i + 1));
-        dot.addEventListener('click', function () { scrollToCard(i); });
-        dotsEl.appendChild(dot);
-      });
-
-      var dots = Array.prototype.slice.call(dotsEl.querySelectorAll('.carousel-dot'));
-
-      function updateBar() {
-        if (!barFill) return;
-        /* Progress = scrollLeft / (scrollWidth - clientWidth) */
-        var max = track.scrollWidth - track.clientWidth;
-        var pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
-        barFill.style.width = pct + '%';
-      }
-
-      function updateDots(index) {
-        dots.forEach(function (d, i) {
-          if (i === index) { d.classList.add('active'); }
-          else             { d.classList.remove('active'); }
-        });
-      }
-
-      function updateButtons() {
-        if (prevBtn) prevBtn.disabled = track.scrollLeft < 4;
-        if (nextBtn) nextBtn.disabled =
-          track.scrollLeft > track.scrollWidth - track.clientWidth - 4;
-      }
-
-      function scrollToCard(index) {
-        var card = cards[Math.max(0, Math.min(index, cards.length - 1))];
-        var padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-        track.scrollTo({ left: card.offsetLeft - padLeft, behavior: 'smooth' });
-      }
-
-      if (prevBtn) {
-        prevBtn.addEventListener('click', function () {
-          track.scrollBy({ left: -track.clientWidth * 0.82, behavior: 'smooth' });
-        });
-      }
-      if (nextBtn) {
-        nextBtn.addEventListener('click', function () {
-          track.scrollBy({ left: track.clientWidth * 0.82, behavior: 'smooth' });
-        });
-      }
-
-      var rafId = null;
-      track.addEventListener('scroll', function () {
-        if (rafId) return;
-        rafId = requestAnimationFrame(function () {
-          rafId = null;
-          updateButtons();
-          updateBar();
-          var padLeft = parseFloat(getComputedStyle(track).paddingLeft) || 0;
-          var closest = 0, closestDist = Infinity;
-          cards.forEach(function (card, i) {
-            var dist = Math.abs(card.offsetLeft - padLeft - track.scrollLeft);
-            if (dist < closestDist) { closestDist = dist; closest = i; }
-          });
-          updateDots(closest);
-        });
-      }, { passive: true });
-
-      updateButtons();
-      updateBar();
-
-      /* Drag to scroll on desktop */
-      var dragging = false, startX = 0, startScroll = 0;
-
-      track.addEventListener('mousedown', function (e) {
-        if (e.button !== 0) return;
-        dragging    = true;
-        startX      = e.clientX;
-        startScroll = track.scrollLeft;
-        track.style.cursor     = 'grabbing';
-        track.style.userSelect = 'none';
-      });
-
-      document.addEventListener('mousemove', function (e) {
-        if (!dragging) return;
-        track.scrollLeft = startScroll - (e.clientX - startX);
-      });
-
-      document.addEventListener('mouseup', function () {
-        if (!dragging) return;
-        dragging = false;
-        track.style.cursor     = '';
-        track.style.userSelect = '';
-      });
-
-      /* Prevent click after drag */
-      track.addEventListener('click', function (e) {
-        if (Math.abs(track.scrollLeft - startScroll) > 5) {
-          e.stopPropagation();
-        }
-      }, true);
-    }
-  } catch (e) { /* carousel non-critical */ }
-
-
-  /* ── 7. Lightbox ──────────────────────────────────────────── */
-  try {
-    var lb      = document.getElementById('lb');
-    var lbImg   = document.getElementById('lbImg');
-    var lbTitle = document.getElementById('lbTitle');
-    var lbMeta  = document.getElementById('lbMeta');
-    var lbCloseBtn = document.getElementById('lbClose');
-    var lbPrev  = document.getElementById('lbPrev');
-    var lbNext  = document.getElementById('lbNext');
-
-    if (!lb || !lbImg) throw new Error('Lightbox elements missing');
-
-    var carouselCards = Array.prototype.slice.call(
-      document.querySelectorAll('.card')
-    );
-    var sketchImgs = Array.prototype.slice.call(
-      document.querySelectorAll('.sk-item')
-    );
-
-    var items = [];
-
-    carouselCards.forEach(function (card) {
-      var img = card.querySelector('img');
-      items.push({
-        src:    img ? img.src : '',
-        title:  card.getAttribute('data-title')  || '',
-        medium: card.getAttribute('data-medium') || ''
-      });
-    });
-
-    sketchImgs.forEach(function (img) {
-      items.push({ src: img.src, title: '', medium: '' });
-    });
-
-    var current = 0;
-
-    function lbOpen(index) {
-      current = Math.max(0, Math.min(index, items.length - 1));
-      var item = items[current];
-
-      lbImg.style.opacity   = '0';
-      lbImg.style.transform = 'scale(0.94)';
-      lbImg.src             = item.src;
-      lbImg.alt             = item.title;
-      if (lbTitle) lbTitle.textContent = item.title;
-      if (lbMeta)  lbMeta.textContent  = item.medium;
-
-      lb.classList.add('open');
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-
-      /* Trigger CSS transition */
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          lbImg.style.opacity   = '';
-          lbImg.style.transform = '';
-        });
-      });
-    }
-
-    function closeLightbox() {
-      lb.classList.remove('open');
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
-
-    function lbGo(dir) {
-      lbOpen((current + dir + items.length) % items.length);
-    }
-
-    /* Attach click to every carousel card */
-    carouselCards.forEach(function (card, i) {
-      card.style.cursor = 'pointer';
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('role', 'button');
-      card.addEventListener('click', function () { lbOpen(i); });
-      card.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          lbOpen(i);
-        }
-      });
-    });
-
-    /* Attach click to sketchbook images */
-    sketchImgs.forEach(function (img, i) {
-      img.style.cursor = 'pointer';
-      img.setAttribute('tabindex', '0');
-      img.setAttribute('role', 'button');
-      img.addEventListener('click', function () {
-        lbOpen(carouselCards.length + i);
-      });
-      img.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          lbOpen(carouselCards.length + i);
-        }
-      });
-    });
-
-    if (lbCloseBtn) lbCloseBtn.addEventListener('click', lbClose);
-    if (lbPrev)  lbPrev.addEventListener('click',  function () { lbGo(-1); });
-    if (lbNext)  lbNext.addEventListener('click',  function () { lbGo(+1); });
-
-    lb.addEventListener('click', function (e) {
-      if (e.target === lb) closeLightbox();
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (!lb.classList.contains('open')) return;
-      if (e.key === 'Escape')     closeLightbox();
-      if (e.key === 'ArrowLeft')  lbGo(-1);
-      if (e.key === 'ArrowRight') lbGo(+1);
-    });
-
-    /* Touch swipe inside lightbox */
-    var touchStartX = 0;
-    lb.addEventListener('touchstart', function (e) {
-      touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-
-    lb.addEventListener('touchend', function (e) {
-      var dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 50) lbGo(dx < 0 ? 1 : -1);
-    }, { passive: true });
-
-  } catch (e) {
-    console.error('Lightbox error:', e);
-  }
-
-})();
+  /* ── Swipe dentro del lightbox ── */
+  var lbTx = 0;
+  lb.addEventListener('touchstart', function (e) {
+    lbTx = e.touches[0].clientX;
+  }, { passive: true });
+  lb.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - lbTx;
+    if (Math.abs(dx) > 50) { lbGo(dx < 0 ? 1 : -1); }
+  }, { passive: true });
+}());
