@@ -42,11 +42,15 @@ function closeMenu() {
   menuOpen = false;
   burger.classList.remove('open');
   overlay.classList.remove('open');
+  /* Quitar pointer-events inmediatamente para que el tap pase al contenido */
+  overlay.style.pointerEvents = 'none';
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
-  /* esconder después de que termine la transición */
   setTimeout(function () {
-    if (!menuOpen) { overlay.style.display = 'none'; }
+    if (!menuOpen) {
+      overlay.style.display = 'none';
+      overlay.style.pointerEvents = '';
+    }
   }, 400);
 }
 
@@ -61,12 +65,38 @@ burger.addEventListener('click', function () {
   if (menuOpen) { closeMenu(); } else { openMenu(); }
 });
 
-/* Cerrar al tocar un link */
+/* Cerrar al tocar un link y navegar a la sección */
 if (mLinks) {
   var mlA = mLinks.querySelectorAll('a');
   for (var i = 0; i < mlA.length; i++) {
-    mlA[i].addEventListener('touchstart', function () { closeMenu(); }, { passive: true });
-    mlA[i].addEventListener('click',      function () { closeMenu(); });
+    mlA[i].addEventListener('touchstart', function (e) {
+      e.preventDefault(); /* evita el delay de 300ms */
+      var href = this.getAttribute('href');
+      closeMenu();
+      /* Pequeño delay para que el overlay suelte el scroll */
+      setTimeout(function () {
+        var target = href ? document.querySelector(href) : null;
+        if (target) {
+          var offset = nav ? nav.offsetHeight + 8 : 8;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      }, 50);
+    }, { passive: false });
+
+    mlA[i].addEventListener('click', function (e) {
+      e.preventDefault();
+      var href = this.getAttribute('href');
+      closeMenu();
+      setTimeout(function () {
+        var target = href ? document.querySelector(href) : null;
+        if (target) {
+          var offset = nav ? nav.offsetHeight + 8 : 8;
+          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      }, 50);
+    });
   }
 }
 
