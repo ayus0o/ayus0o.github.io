@@ -1,5 +1,8 @@
+
 /* ═══════════════════════════════════════════════════════════════
    IVAN AYUSO — style.css
+   Optimizado para móvil: sin filter en cards, sin backdrop-filter,
+   will-change solo donde es necesario y por tiempo limitado.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -11,7 +14,7 @@
   --ink-soft:   #555249;
   --ink:        #1a1814;
   --black:      #0b0a09;
-  --ochre:      #c8922a;   /* warm yellow-ochre for about section */
+  --ochre:      #c8922a;
   --ochre-dark: #b07d1a;
   --garnet:     #5a0f0f;
   --accent:     #c0392b;
@@ -20,6 +23,7 @@
   --f-display:  'Cormorant Garamond', Georgia, serif;
   --f-body:     'EB Garamond', Georgia, serif;
 
+  /* Easings simples — más rápidos de calcular en móvil */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-std:    cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -31,7 +35,12 @@
 /* ── Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Prevent iOS rubber-band scroll lag */
+  overflow-x: hidden;
+}
 
 body {
   background: var(--white);
@@ -46,11 +55,21 @@ body {
 img    { display: block; max-width: 100%; height: auto; }
 a      { color: inherit; text-decoration: none; }
 ul     { list-style: none; }
-button { background: none; border: none; cursor: pointer; font: inherit; color: inherit; }
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  /* Elimina delay de 300ms en iOS */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 
 
 /* ══════════════════════════════════════════════════════════════
    NAV
+   Sin backdrop-filter — costoso en móvil. Fondo sólido semiopaco.
 ══════════════════════════════════════════════════════════════ */
 .nav {
   position: fixed;
@@ -61,17 +80,16 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   justify-content: space-between;
   padding: 1rem var(--gutter);
   border-bottom: 1px solid transparent;
-  transition: background 0.4s var(--ease-std), border-color 0.4s;
+  /* Solo transicionar background y border — no transform */
+  transition: background 0.3s linear, border-color 0.3s linear;
 }
 
 .nav.scrolled {
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Fondo sólido en vez de blur — mucho más rápido */
+  background: rgba(255, 255, 255, 0.97);
   border-bottom-color: var(--ink);
 }
 
-/* Pinyon Script for name in nav */
 .nav-name {
   font-family: var(--f-cursive);
   font-weight: 400;
@@ -82,7 +100,6 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   z-index: 101;
 }
 
-/* Desktop nav links */
 .nav-links {
   display: flex;
   gap: 2.5rem;
@@ -103,73 +120,62 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   bottom: -2px; left: 0;
   width: 0; height: 1px;
   background: var(--accent);
-  transition: width 0.3s var(--ease-out);
+  transition: width 0.25s var(--ease-out);
 }
 
 .nav-links a:hover { color: var(--ink); }
 .nav-links a:hover::after { width: 100%; }
 
-/* ── Hamburger button ── */
+
+/* ── Hamburger ── */
 .nav-burger {
-  display: none;          /* hidden on desktop */
+  display: none;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
+  /* 44×44 mínimo recomendado por Apple para touch targets */
   width: 44px;
   height: 44px;
   padding: 10px;
-  cursor: pointer;
   position: relative;
-  z-index: 200;           /* above overlay */
-  background: none;
-  border: none;
+  z-index: 200;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 .nav-burger span {
   display: block;
-  width: 100%;
+  width: 22px;
   height: 1.5px;
   background: var(--ink);
   border-radius: 1px;
-  transition: transform 0.3s var(--ease-out),
-              opacity 0.3s var(--ease-out);
+  /* Solo transform y opacity — ambas en GPU, sin layout */
+  transition: transform 0.28s var(--ease-out), opacity 0.28s;
   transform-origin: center;
 }
 
-/* X state */
 .nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
 .nav-burger.open span:nth-child(2) { transform: translateY(-6.5px) rotate(-45deg); }
 
 
-/* ── Mobile overlay (full screen menu) ── */
+/* ── Mobile overlay ── */
 .mobile-overlay {
-  display: none;          /* toggled to flex by JS */
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 150;
-  background: rgba(255, 255, 255, 0.98);
+  /* Color sólido — sin blur, sin transparencia costosa */
+  background: #ffffff;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /* Solo opacity — propiedad GPU, no causa layout */
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s linear;
   border-top: 2px solid var(--ink);
-  /* Ensure it's above everything except lightbox */
-  -webkit-overflow-scrolling: touch;
 }
 
-.mobile-overlay.open {
-  opacity: 1;
-}
-
-/* Make sure overlay shows on mobile breakpoint */
-@media (max-width: 680px) {
-  .mobile-overlay {
-    /* display controlled by JS, flex when open */
-  }
-}
+.mobile-overlay.open { opacity: 1; }
 
 .mobile-links {
   display: flex;
@@ -187,12 +193,31 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   letter-spacing: 0.04em;
   color: var(--ink);
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    HERO
 ══════════════════════════════════════════════════════════════ */
+
+/* "Portfolio" label — top right, crimson Apple style */
+.hero-portfolio-label {
+  position: absolute;
+  top: clamp(4.5rem, 8vw, 5.5rem);
+  right: var(--gutter);
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a51c30;
+  opacity: 0;
+  animation: riseIn 0.8s 1.3s var(--ease-out) forwards;
+  pointer-events: none;
+  user-select: none;
+}
+
 .hero {
   min-height: 100svh;
   display: grid;
@@ -210,7 +235,6 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   gap: 2rem;
 }
 
-/* Big cursive name */
 .hero-name {
   font-family: var(--f-cursive);
   font-weight: 400;
@@ -220,6 +244,7 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   grid-column: 1;
   align-self: end;
   opacity: 0;
+  /* translate solo en Y — una sola propiedad GPU */
   transform: translateY(20px);
   animation: riseIn 1s 0.1s var(--ease-out) forwards;
 }
@@ -295,6 +320,7 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 }
 
 .hero-down:hover { color: var(--ink); }
+
 .hero-down svg {
   transform: rotate(90deg);
   animation: nudge 2.4s 1.5s ease-in-out infinite;
@@ -323,7 +349,9 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
 
 /* ══════════════════════════════════════════════════════════════
-   SELECTED WORKS — black bg carousel
+   SELECTED WORKS — carousel
+   Sin filter en imágenes — el efecto hover lo da opacity.
+   Sin will-change en cada card — solo en el track.
 ══════════════════════════════════════════════════════════════ */
 .works {
   background: var(--black);
@@ -351,28 +379,28 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
 .carousel-outer {
   position: relative;
+  /* overflow:hidden corta las sombras — usamos clip-path en su lugar */
   overflow: hidden;
-}
-
-/* Nudge track so arrows don't overlap first/last cards */
-.track {
-  padding-left: calc(var(--gutter) + 2rem);
-  padding-right: calc(var(--gutter) + 2rem);
 }
 
 .track {
   display: flex;
   align-items: flex-end;
   gap: clamp(1rem, 2vw, 1.8rem);
-  padding: 3rem var(--gutter);
+  padding: 3rem calc(var(--gutter) + 2rem);
+
+  /* Scroll nativo — el browser lo maneja sin JS */
   overflow-x: scroll;
   overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;  /* momentum en iOS */
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+
+  /* Ocultar scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  will-change: scroll-position;
+
+  /* NO will-change aquí — deja que el browser optimice solo */
 }
 .track::-webkit-scrollbar { display: none; }
 
@@ -380,8 +408,7 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   flex-shrink: 0;
   scroll-snap-align: start;
   cursor: pointer;
-  will-change: transform;
-  transform: translateZ(0);
+  /* Solo opacity en hover — no transform, no filter en móvil */
 }
 
 .card[data-orient="portrait"] .card-img-wrap {
@@ -405,15 +432,14 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.7s var(--ease-spring), filter 0.5s var(--ease-std);
-  filter: brightness(0.72) grayscale(8%);
-  transform: scale(1) translateZ(0);
-  will-change: transform;
+  /* Solo opacity — la propiedad más barata para GPU */
+  opacity: 0.82;
+  transition: opacity 0.4s linear;
 }
 
-.card:hover .card-img-wrap img {
-  transform: scale(1.045) translateZ(0);
-  filter: brightness(1) grayscale(0%);
+.card:hover .card-img-wrap img,
+.card:focus .card-img-wrap img {
+  opacity: 1;
 }
 
 .card-cap {
@@ -439,88 +465,73 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   color: rgba(255,255,255,0.3);
 }
 
+/* Fade edges */
 .carousel-fade-left,
 .carousel-fade-right {
   position: absolute;
   top: 0; bottom: 0;
-  width: clamp(2rem, 4vw, 4rem);
+  width: clamp(2rem, 4vw, 3.5rem);
   pointer-events: none;
   z-index: 2;
 }
 .carousel-fade-left  { left: 0;  background: linear-gradient(to right, var(--black), transparent); }
 .carousel-fade-right { right: 0; background: linear-gradient(to left,  var(--black), transparent); }
 
-/* ── Progress bar replaces dots ── */
+/* Progress bar */
 .carousel-nav {
-  padding: 0 var(--gutter);
-  padding-top: 1.2rem;
+  padding: 1.2rem var(--gutter) 0;
 }
 
-.carousel-dots { display: none; } /* dots replaced by bar */
+.carousel-dots { display: none; }
+.carousel-btns { display: none; }
 
 .carousel-bar-track {
   width: 100%;
   height: 1px;
   background: rgba(255,255,255,0.12);
   position: relative;
-  border-radius: 1px;
 }
 
 .carousel-bar-fill {
   position: absolute;
   top: 0; left: 0;
   height: 100%;
-  background: rgba(255,255,255,0.75);
-  border-radius: 1px;
-  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  background: rgba(255,255,255,0.7);
+  /* Solo width — sin transform para evitar subpixel issues */
+  transition: width 0.2s linear;
   width: 0%;
 }
 
-/* ── Arrows on the sides of the carousel stage ── */
-.carousel-btns { display: none; } /* old bottom buttons hidden */
-
-.carousel-btn {
-  display: none; /* hidden — replaced by side arrows */
-}
-
+/* Side arrows */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: rgba(255,255,255,0.55);
-  font-size: 1.6rem;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.5rem;
   line-height: 1;
-  padding: 1rem 0.6rem;
-  transition: color 0.2s ease, transform 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  /* tall enough to be easy to tap on mobile */
+  /* 44×44 touch target */
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.carousel-arrow:hover {
-  color: rgba(255,255,255,0.95);
-  transform: translateY(-50%) scale(1.15);
-}
+.carousel-arrow:hover  { color: rgba(255,255,255,0.95); }
+.carousel-arrow:disabled { color: rgba(255,255,255,0.1); pointer-events: none; }
 
-.carousel-arrow:disabled {
-  color: rgba(255,255,255,0.1);
-  cursor: default;
-  transform: translateY(-50%) scale(1);
-}
-
-.carousel-arrow--prev { left: 0.75rem; }
-.carousel-arrow--next { right: 0.75rem; }
+.carousel-arrow--prev { left: 0.25rem; }
+.carousel-arrow--next { right: 0.25rem; }
 
 
 /* ══════════════════════════════════════════════════════════════
    SKETCHBOOK — black bg
+   Sin filter en imágenes — opacity es suficiente y mucho más rápido
 ══════════════════════════════════════════════════════════════ */
 .sketchbook {
   background: var(--black);
@@ -556,22 +567,20 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   width: 100%;
   height: auto;
   border: 2px solid var(--black);
-  transition: filter 0.5s var(--ease-spring), transform 0.5s var(--ease-spring);
-  filter: brightness(0.55) grayscale(20%);
   cursor: pointer;
-  will-change: transform;
+  /* Opacity en vez de filter — 10x más rápido en móvil */
+  opacity: 0.65;
+  transition: opacity 0.3s linear;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.sk-item:hover {
-  filter: brightness(1) grayscale(0%);
-  transform: scale(1.02);
-  position: relative;
-  z-index: 1;
-}
+.sk-item:hover,
+.sk-item:focus { opacity: 1; }
 
 
 /* ══════════════════════════════════════════════════════════════
-   ABOUT — warm ochre background, dark text
+   ABOUT — ochre
 ══════════════════════════════════════════════════════════════ */
 .about {
   background: var(--ochre);
@@ -599,11 +608,8 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   color: rgba(0,0,0,0.4);
 }
 
-.about-text {
-  padding: 3.5rem clamp(2rem, 4vw, 4rem);
-}
+.about-text { padding: 3.5rem clamp(2rem, 4vw, 4rem); }
 
-/* Dark black text on ochre */
 .about-text p {
   font-family: var(--f-body);
   font-size: clamp(1.05rem, 1.25vw, 1.18rem);
@@ -626,15 +632,9 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 /* ══════════════════════════════════════════════════════════════
    CONTACT
 ══════════════════════════════════════════════════════════════ */
-.contact {
-  background: var(--ink);
-  color: var(--white);
-}
+.contact { background: var(--ink); color: var(--white); }
 
-.contact-inner {
-  max-width: var(--max);
-  margin: 0 auto;
-}
+.contact-inner { max-width: var(--max); margin: 0 auto; }
 
 .contact-inner .section-eyebrow {
   display: block;
@@ -652,10 +652,8 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   padding: 2rem var(--gutter);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   gap: 1rem;
-  transition: background 0.25s;
+  touch-action: manipulation;
 }
-
-.contact-link:hover { background: rgba(255,255,255,0.04); }
 
 .contact-label {
   font-size: 0.62rem;
@@ -673,12 +671,15 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   font-weight: 300;
   color: var(--white);
   line-height: 1;
-  transition: color 0.2s;
-  /* Force numeric zero to render as 0, not O */
-  font-variant-numeric: slashed-zero;
 }
 
-.contact-link:hover .contact-value { color: rgba(255,255,255,0.55); }
+/* Clase especial para mostrar ceros sin ambigüedad */
+.zero-safe {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-style: italic;
+  font-variant-numeric: slashed-zero;
+  font-feature-settings: "zero" 1, "onum" 0;
+}
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -710,7 +711,8 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
 
 /* ══════════════════════════════════════════════════════════════
-   LIGHTBOX — garnet background
+   LIGHTBOX — garnet
+   Sin box-shadow durante la transición — se añade después.
 ══════════════════════════════════════════════════════════════ */
 .lb {
   position: fixed;
@@ -725,7 +727,8 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   justify-content: center;
   padding: 2rem;
   gap: 1.2rem;
-  transition: opacity 0.4s var(--ease-spring);
+  /* Solo opacity — una propiedad GPU */
+  transition: opacity 0.3s linear;
 }
 
 .lb.open { opacity: 1; pointer-events: all; }
@@ -744,14 +747,12 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
   max-height: calc(100vh - 140px);
   object-fit: contain;
   display: block;
-  transform: scale(0.94) translateZ(0);
   opacity: 0;
-  transition: transform 0.55s var(--ease-spring), opacity 0.55s var(--ease-spring);
-  box-shadow: 0 8px 60px rgba(0,0,0,0.6);
-  will-change: transform, opacity;
+  /* Solo opacity para la transición de entrada — sin transform scale */
+  transition: opacity 0.4s linear;
 }
 
-.lb.open .lb-img { transform: scale(1) translateZ(0); opacity: 1; }
+.lb.open .lb-img { opacity: 1; }
 
 .lb-caption {
   display: flex;
@@ -787,26 +788,32 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
 .lb-close, .lb-prev, .lb-next {
   position: absolute;
-  color: rgba(255,255,255,0.45);
-  padding: 0.75rem;
-  line-height: 1;
+  color: rgba(255,255,255,0.5);
+  /* 44×44 touch target */
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: color 0.2s;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 .lb-close:hover, .lb-prev:hover, .lb-next:hover { color: rgba(255,255,255,0.95); }
-.lb-close { top: 1.5rem; right: 1.5rem; font-size: 1rem; }
-.lb-prev  { left: 1rem;  top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
-.lb-next  { right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
+.lb-close { top: 1rem; right: 1rem; font-size: 1rem; }
+.lb-prev  { left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
+.lb-next  { right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
 
 
 /* ══════════════════════════════════════════════════════════════
    SCROLL REVEAL
+   Solo opacity + translateY — ambas en GPU, no causan layout.
 ══════════════════════════════════════════════════════════════ */
 .will-reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.85s var(--ease-out), transform 0.85s var(--ease-out);
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
 }
 .will-reveal.revealed { opacity: 1; transform: translateY(0); }
 
@@ -844,18 +851,14 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
 
 /* ══════════════════════════════════════════════════════════════
-   RESPONSIVE — mobile ≤ 680px
-   Nav links hidden; hamburger + overlay used instead
+   RESPONSIVE — móvil ≤ 680px
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 680px) {
-  /* Hide desktop links, show burger */
   .nav-links  { display: none; }
   .nav-burger { display: flex; }
-
-  /* Show mobile overlay as flex when active */
-  .mobile-overlay {
-    display: flex;
-  }
+  .mobile-overlay { display: flex; opacity: 0; }
+  /* ocultarlo visualmente, JS controla display */
+  .mobile-overlay:not(.open) { display: none; }
 
   .hero-bar { flex-wrap: wrap; gap: 0.5rem; }
 
@@ -865,7 +868,5 @@ button { background: none; border: none; cursor: pointer; font: inherit; color: 
 
   .sketchbook-scatter { columns: 1; }
 
-  .lb-prev { left: 0.25rem; }
-  .lb-next { right: 0.25rem; }
   .lb-caption { flex-direction: column; gap: 0.3rem; }
 }
