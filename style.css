@@ -382,88 +382,139 @@ button {
 
 .carousel-outer {
   position: relative;
-  /* overflow:hidden corta las sombras — usamos clip-path en su lugar */
   overflow: hidden;
 }
 
 .track {
   display: flex;
+  /* Bottom-align so mixed heights sit on the same baseline */
   align-items: flex-end;
-  gap: clamp(1rem, 2vw, 1.8rem);
-  padding: 3rem calc(var(--gutter) + 2rem);
-
-  /* Scroll nativo — el browser lo maneja sin JS */
+  gap: clamp(2rem, 4vw, 3.5rem);
+  padding: 4rem calc(var(--gutter) + 2.5rem) 3rem;
   overflow-x: scroll;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;  /* momentum en iOS */
+  -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-
-  /* Ocultar scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
-
-  /* NO will-change aquí — deja que el browser optimice solo */
 }
 .track::-webkit-scrollbar { display: none; }
 
+/* ── Base card ── */
 .card {
   flex-shrink: 0;
   scroll-snap-align: start;
   cursor: pointer;
-  /* Solo opacity en hover — no transform, no filter en móvil */
+  display: flex;
+  flex-direction: column;
 }
 
+/*
+  Each card's image wrap gets a fixed HEIGHT based on orientation,
+  and a WIDTH derived from the actual artwork's aspect ratio.
+  This means the image container IS the artwork's shape — no dead space.
+
+  Portrait works  (35×50, 43×35→ treated as portrait, 38×28, 50×25):
+    height = 68vh clamped, width = height × (w/h)
+
+  Landscape works (50×35, 70×50, 76×52, 70×50):
+    height = 50vh clamped, width = height × (w/h)
+
+  We set height via CSS variable and width via aspect-ratio —
+  the browser calculates the exact width automatically.
+*/
+
+/* ── Portrait orientations ── */
 .card[data-orient="portrait"] .card-img-wrap {
-  height: clamp(300px, 65vh, 620px);
-  aspect-ratio: 35 / 50;
+  height: clamp(280px, 62vh, 580px);
 }
 
+/* Artwork 2 — Mi amor  35×50  → ratio 35/50 = 0.7 */
+.card[data-title="Mi amor"] .card-img-wrap        { aspect-ratio: 35 / 50; }
+/* Artwork 5 — Bruma    50×25  → ratio 50/25 = 2.0 (landscape shape, portrait slot) */
+.card[data-title="Bruma"] .card-img-wrap          { aspect-ratio: 50 / 25; height: clamp(200px, 38vh, 380px); }
+/* Artwork 6 — Claroscuro 38×28 → ratio 38/28 ≈ 1.36 */
+.card[data-title="Claroscuro"] .card-img-wrap     { aspect-ratio: 38 / 28; height: clamp(240px, 48vh, 460px); }
+/* Artwork 3 — Reparo   43×35  → ratio 43/35 ≈ 1.23 */
+.card[data-title="Reparo"] .card-img-wrap         { aspect-ratio: 43 / 35; height: clamp(240px, 48vh, 460px); }
+
+/* ── Landscape orientations ── */
 .card[data-orient="landscape"] .card-img-wrap {
-  height: clamp(210px, 45vh, 434px);
-  aspect-ratio: 50 / 35;
+  height: clamp(220px, 48vh, 460px);
 }
 
+/* Artwork 1 — Sentencia  50×35  → ratio 50/35 ≈ 1.43 */
+.card[data-title="Sentencia"] .card-img-wrap      { aspect-ratio: 50 / 35; }
+/* Artwork 4 — Baila      70×50  → ratio 70/50 = 1.4 */
+.card[data-title="Baila"] .card-img-wrap          { aspect-ratio: 70 / 50; }
+/* Artwork 7 — Sin título (carbón) 70×50 → ratio 70/50 = 1.4 */
+.card[data-title="Sin título"][data-medium^="Carbón"] .card-img-wrap  { aspect-ratio: 70 / 50; }
+/* Artwork 8 — Sin título (tinta azul cartón) 76×52 → ratio 76/52 ≈ 1.46 */
+.card[data-title="Sin título"][data-medium^="Tinta azul sobre cartón · 76 × 52"] .card-img-wrap { aspect-ratio: 76 / 52; }
+/* Artwork 9 — Distancia  70×50 → ratio 70/50 = 1.4 */
+.card[data-title="Distancia"] .card-img-wrap      { aspect-ratio: 70 / 50; }
+/* Artwork 10 — Sin título (bailarinas) 76×51 → ratio 76/51 ≈ 1.49 */
+.card[data-title="Sin título"][data-medium^="Tinta azul sobre cartón · 76 × 51"] .card-img-wrap { aspect-ratio: 76 / 51; }
+/* Artwork 11 — Sin título (lago) 70×50 → ratio 70/50 = 1.4 */
+.card[data-title="Sin título"][data-medium^="Acrílico"] .card-img-wrap { aspect-ratio: 70 / 50; }
+
+/* ── Image wrap shared styles ── */
 .card-img-wrap {
   overflow: hidden;
-  background: #111;
-  border: 1px solid rgba(255,255,255,0.06);
+  /* Warm near-black — feels like viewing under gallery lighting */
+  background: #0e0c0a;
+  border: 1px solid rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Subtle paper shadow — makes it feel like a physical work */
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.5),
+    0 12px 40px rgba(0,0,0,0.4);
+  transition: box-shadow 0.4s linear;
+}
+
+.card:hover .card-img-wrap {
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.6),
+    0 20px 60px rgba(0,0,0,0.55);
 }
 
 .card-img-wrap img {
   width: 100%;
   height: 100%;
-  /* contain = full image always visible, no cropping */
+  /* contain = complete image, never cropped */
   object-fit: contain;
   object-position: center;
   display: block;
-  opacity: 0.88;
-  transition: opacity 0.4s linear;
+  opacity: 0.9;
+  transition: opacity 0.35s linear;
 }
 
 .card:hover .card-img-wrap img,
-.card:focus .card-img-wrap img {
+.card:focus  .card-img-wrap img {
   opacity: 1;
 }
 
+/* ── Caption ── */
 .card-cap {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding-top: 0.65rem;
-  border-top: 1px solid rgba(255,255,255,0.18);
-  margin-top: 0.1rem;
+  padding-top: 0.75rem;
+  margin-top: 0.2rem;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  gap: 1rem;
 }
 
 .card-title {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 400;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
 }
 
 .card-year {
