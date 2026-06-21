@@ -352,10 +352,14 @@ button {
    Sin filter en imágenes — el efecto hover lo da opacity.
    Sin will-change en cada card — solo en el track.
 ══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   SELECTED WORKS — white card carousel (reference style)
+   White cards on black. Monospaced text. Caption above image.
+══════════════════════════════════════════════════════════════ */
 .works {
   background: var(--black);
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 2.5rem;
+  padding-bottom: 3rem;
 }
 
 .works-header {
@@ -363,7 +367,7 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 1.4rem var(--gutter);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .works-header .section-eyebrow {
@@ -377,7 +381,7 @@ button {
   font-size: 0.6rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.25);
 }
 
 .carousel-outer {
@@ -387,10 +391,9 @@ button {
 
 .track {
   display: flex;
-  /* Bottom-align so mixed heights sit on the same baseline */
-  align-items: flex-end;
-  gap: clamp(2rem, 4vw, 3.5rem);
-  padding: 4rem calc(var(--gutter) + 2.5rem) 3rem;
+  align-items: stretch;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding: 3rem var(--gutter);
   overflow-x: scroll;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -401,134 +404,109 @@ button {
 }
 .track::-webkit-scrollbar { display: none; }
 
-/* ── Base card ── */
+/* White card */
 .card {
   flex-shrink: 0;
   scroll-snap-align: start;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  background: var(--white);
+  padding: clamp(0.9rem, 1.5vw, 1.3rem);
+  width: clamp(260px, 38vw, 520px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+  transition: box-shadow 0.3s linear;
 }
 
-/*
-  Each card's image wrap gets a fixed HEIGHT based on orientation,
-  and a WIDTH derived from the actual artwork's aspect ratio.
-  This means the image container IS the artwork's shape — no dead space.
-
-  Portrait works  (35×50, 43×35→ treated as portrait, 38×28, 50×25):
-    height = 68vh clamped, width = height × (w/h)
-
-  Landscape works (50×35, 70×50, 76×52, 70×50):
-    height = 50vh clamped, width = height × (w/h)
-
-  We set height via CSS variable and width via aspect-ratio —
-  the browser calculates the exact width automatically.
-*/
-
-/* ── Portrait orientations ── */
-.card[data-orient="portrait"] .card-img-wrap {
-  height: clamp(280px, 62vh, 580px);
+.card:hover {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7);
 }
 
-/* Artwork 2 — Mi amor  35×50  → ratio 35/50 = 0.7 */
-.card[data-title="Mi amor"] .card-img-wrap        { aspect-ratio: 35 / 50; }
-/* Artwork 5 — Bruma    50×25  → ratio 50/25 = 2.0 (landscape shape, portrait slot) */
-.card[data-title="Bruma"] .card-img-wrap          { aspect-ratio: 50 / 25; height: clamp(200px, 38vh, 380px); }
-/* Artwork 6 — Claroscuro 38×28 → ratio 38/28 ≈ 1.36 */
-.card[data-title="Claroscuro"] .card-img-wrap     { aspect-ratio: 38 / 28; height: clamp(240px, 48vh, 460px); }
-/* Artwork 3 — Reparo   43×35  → ratio 43/35 ≈ 1.23 */
-.card[data-title="Reparo"] .card-img-wrap         { aspect-ratio: 43 / 35; height: clamp(240px, 48vh, 460px); }
+/* Per-artwork card widths */
+.card[data-title="Sentencia"]   { width: clamp(300px, 44vw, 580px); }
+.card[data-title="Mi amor"]     { width: clamp(210px, 26vw, 360px); }
+.card[data-title="Reparo"]      { width: clamp(260px, 34vw, 460px); }
+.card[data-title="Baila"]       { width: clamp(300px, 44vw, 580px); }
+.card[data-title="Bruma"]       { width: clamp(340px, 52vw, 680px); }
+.card[data-title="Claroscuro"]  { width: clamp(260px, 34vw, 460px); }
+.card[data-title="Distancia"]   { width: clamp(300px, 44vw, 580px); }
 
-/* ── Landscape orientations ── */
-.card[data-orient="landscape"] .card-img-wrap {
-  height: clamp(220px, 48vh, 460px);
+/* Caption ABOVE the image */
+.card-cap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.8rem;
+  padding: 0;
+  border: none;
 }
 
-/* Artwork 1 — Sentencia  50×35  → ratio 50/35 ≈ 1.43 */
-.card[data-title="Sentencia"] .card-img-wrap      { aspect-ratio: 50 / 35; }
-/* Artwork 4 — Baila      70×50  → ratio 70/50 = 1.4 */
-.card[data-title="Baila"] .card-img-wrap          { aspect-ratio: 70 / 50; }
-/* Artwork 7 — Sin título (carbón) 70×50 → ratio 70/50 = 1.4 */
-.card[data-title="Sin título"][data-medium^="Carbón"] .card-img-wrap  { aspect-ratio: 70 / 50; }
-/* Artwork 8 — Sin título (tinta azul cartón) 76×52 → ratio 76/52 ≈ 1.46 */
-.card[data-title="Sin título"][data-medium^="Tinta azul sobre cartón · 76 × 52"] .card-img-wrap { aspect-ratio: 76 / 52; }
-/* Artwork 9 — Distancia  70×50 → ratio 70/50 = 1.4 */
-.card[data-title="Distancia"] .card-img-wrap      { aspect-ratio: 70 / 50; }
-/* Artwork 10 — Sin título (bailarinas) 76×51 → ratio 76/51 ≈ 1.49 */
-.card[data-title="Sin título"][data-medium^="Tinta azul sobre cartón · 76 × 51"] .card-img-wrap { aspect-ratio: 76 / 51; }
-/* Artwork 11 — Sin título (lago) 70×50 → ratio 70/50 = 1.4 */
-.card[data-title="Sin título"][data-medium^="Acrílico"] .card-img-wrap { aspect-ratio: 70 / 50; }
+/* Monospaced — matches reference typography */
+.card-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-style: normal;
+  font-size: clamp(0.65rem, 0.95vw, 0.78rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
 
-/* ── Image wrap shared styles ── */
+.card-year {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.6rem, 0.85vw, 0.72rem);
+  letter-spacing: 0.02em;
+  color: var(--mid);
+  text-transform: uppercase;
+}
+
+.card-medium {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.58rem, 0.8vw, 0.68rem);
+  color: var(--mid);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Image fills card, correct ratio, no crop */
 .card-img-wrap {
+  flex: 1;
   overflow: hidden;
-  /* Warm near-black — feels like viewing under gallery lighting */
-  background: #0e0c0a;
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Subtle paper shadow — makes it feel like a physical work */
-  box-shadow:
-    0 2px 8px rgba(0,0,0,0.5),
-    0 12px 40px rgba(0,0,0,0.4);
-  transition: box-shadow 0.4s linear;
-}
-
-.card:hover .card-img-wrap {
-  box-shadow:
-    0 4px 16px rgba(0,0,0,0.6),
-    0 20px 60px rgba(0,0,0,0.55);
 }
 
 .card-img-wrap img {
   width: 100%;
   height: 100%;
-  /* contain = complete image, never cropped */
   object-fit: contain;
   object-position: center;
   display: block;
-  opacity: 0.9;
-  transition: opacity 0.35s linear;
 }
 
-.card:hover .card-img-wrap img,
-.card:focus  .card-img-wrap img {
-  opacity: 1;
-}
-
-/* ── Caption ── */
-.card-cap {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding-top: 0.75rem;
-  margin-top: 0.2rem;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  gap: 1rem;
-}
-
-.card-title {
-  font-family: var(--f-display);
-  font-style: italic;
-  font-size: 1.05rem;
-  font-weight: 400;
-  color: rgba(255,255,255,0.9);
-  line-height: 1.2;
-}
-
-.card-year {
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  color: rgba(255,255,255,0.3);
-}
+/* Per-artwork aspect ratios */
+.card[data-title="Sentencia"]  .card-img-wrap { aspect-ratio: 50 / 35; }
+.card[data-title="Mi amor"]    .card-img-wrap { aspect-ratio: 35 / 50; }
+.card[data-title="Reparo"]     .card-img-wrap { aspect-ratio: 43 / 35; }
+.card[data-title="Baila"]      .card-img-wrap { aspect-ratio: 70 / 50; }
+.card[data-title="Bruma"]      .card-img-wrap { aspect-ratio: 50 / 25; }
+.card[data-title="Claroscuro"] .card-img-wrap { aspect-ratio: 38 / 28; }
+.card[data-title="Distancia"]  .card-img-wrap { aspect-ratio: 70 / 50; }
+.card[data-medium^="Carbón sobre papel"]                 .card-img-wrap { aspect-ratio: 70 / 50; }
+.card[data-medium^="Tinta azul sobre cartón · 76 × 52"] .card-img-wrap { aspect-ratio: 76 / 52; }
+.card[data-medium^="Tinta azul sobre cartón · 76 × 51"] .card-img-wrap { aspect-ratio: 76 / 51; }
+.card[data-medium^="Acrílico"]                           .card-img-wrap { aspect-ratio: 70 / 50; }
 
 /* Fade edges */
 .carousel-fade-left,
 .carousel-fade-right {
   position: absolute;
   top: 0; bottom: 0;
-  width: clamp(2rem, 4vw, 3.5rem);
+  width: clamp(1.5rem, 3vw, 3rem);
   pointer-events: none;
   z-index: 2;
 }
@@ -536,10 +514,7 @@ button {
 .carousel-fade-right { right: 0; background: linear-gradient(to left,  var(--black), transparent); }
 
 /* Progress bar */
-.carousel-nav {
-  padding: 1.2rem var(--gutter) 0;
-}
-
+.carousel-nav { padding: 1.5rem var(--gutter) 0; }
 .carousel-dots { display: none; }
 .carousel-btns { display: none; }
 
@@ -554,8 +529,7 @@ button {
   position: absolute;
   top: 0; left: 0;
   height: 100%;
-  background: rgba(255,255,255,0.7);
-  /* Solo width — sin transform para evitar subpixel issues */
+  background: rgba(255,255,255,0.6);
   transition: width 0.2s linear;
   width: 0%;
 }
@@ -567,9 +541,7 @@ button {
   transform: translateY(-50%);
   z-index: 10;
   color: rgba(255,255,255,0.5);
-  font-size: 1.5rem;
-  line-height: 1;
-  /* 44×44 touch target */
+  font-size: 1.3rem;
   width: 44px;
   height: 44px;
   display: flex;
@@ -580,16 +552,13 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-.carousel-arrow:hover  { color: rgba(255,255,255,0.95); }
+.carousel-arrow:hover    { color: rgba(255,255,255,0.95); }
 .carousel-arrow:disabled { color: rgba(255,255,255,0.1); pointer-events: none; }
-
 .carousel-arrow--prev { left: 0.25rem; }
 .carousel-arrow--next { right: 0.25rem; }
 
-
 /* ══════════════════════════════════════════════════════════════
-   SKETCHBOOK — collage grid
-   Diferentes tamaños, hover solo hace scale.
+   SKETCHBOOK — reduced collage, tight, no gaps
 ══════════════════════════════════════════════════════════════ */
 .sketchbook {
   background: var(--black);
@@ -613,18 +582,11 @@ button {
 .sketchbook-note {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
   font-weight: 300;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.3);
 }
 
-/*
-  SKETCHBOOK COLLAGE — puzzle layout
-  Each image shows completely (object-fit: contain), no cropping.
-  Images tile the full width of the screen with no gaps between them.
-  Rows use auto height so each image dictates its own space.
-  The grid uses CSS columns (masonry-like) so images fill naturally.
-*/
 .sketchbook-collage {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -636,17 +598,15 @@ button {
 .sk-item {
   display: block;
   width: 100%;
-  height: auto;           /* natural height — no cropping */
-  object-fit: contain;    /* full image always visible */
+  height: auto;
+  object-fit: contain;
   background: var(--black);
   cursor: pointer;
-  opacity: 0.88;
-  transition: transform 0.35s var(--ease-out), opacity 0.3s linear;
+  opacity: 0.82;
+  transition: transform 0.3s var(--ease-out), opacity 0.25s linear;
   transform-origin: center;
   position: relative;
   z-index: 1;
-  /* Remove any inherited sizing that could force crop */
-  max-width: 100%;
   vertical-align: top;
 }
 
@@ -656,64 +616,13 @@ button {
   z-index: 10;
 }
 
-/* Size classes — control how many columns each image spans.
-   This creates the puzzle/collage variety without cropping. */
-.sk-a { grid-column: span 2; }   /* wide — 2 cols */
-.sk-b { grid-column: span 1; }   /* narrow — 1 col */
-.sk-c { grid-column: span 1; }   /* narrow — 1 col */
-.sk-d { grid-column: span 2; }   /* wide — 2 cols */
-.sk-e { grid-column: span 1; }   /* narrow — 1 col */
-.sk-f { grid-column: span 2; }   /* wide — 2 cols */
-
-
-/* ══════════════════════════════════════════════════════════════
-   ABOUT — ochre
-══════════════════════════════════════════════════════════════ */
-.about {
-  background: var(--ochre);
-  border-bottom: 2px solid var(--ochre-dark);
-}
-
-.about-inner {
-  max-width: var(--max);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-}
-
-.about-label {
-  border-right: 1px solid rgba(0,0,0,0.2);
-  display: flex;
-  align-items: flex-start;
-  padding: 3rem 2rem;
-}
-
-.about-label .section-eyebrow {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  letter-spacing: 0.3em;
-  color: rgba(0,0,0,0.4);
-}
-
-.about-text { padding: 3.5rem clamp(2rem, 4vw, 4rem); }
-
-.about-text p {
-  font-family: var(--f-body);
-  font-size: clamp(1.05rem, 1.25vw, 1.18rem);
-  line-height: 1.88;
-  color: #0d0b08;
-  max-width: 62ch;
-}
-
-.about-text p + p { margin-top: 1.4rem; }
-
-.about-text p:last-child {
-  font-style: italic;
-  color: rgba(0,0,0,0.55);
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(0,0,0,0.18);
-}
+/* Size classes */
+.sk-a { grid-column: span 2; }
+.sk-b { grid-column: span 1; }
+.sk-c { grid-column: span 1; }
+.sk-d { grid-column: span 2; }
+.sk-e { grid-column: span 1; }
+.sk-f { grid-column: span 2; }
 
 
 /* ══════════════════════════════════════════════════════════════
