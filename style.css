@@ -1,3 +1,4 @@
+
 /* ═══════════════════════════════════════════════════════════════
    IVAN AYUSO — style.css
    Optimizado para móvil: sin filter en cards, sin backdrop-filter,
@@ -353,13 +354,12 @@ button {
    Sin will-change en cada card — solo en el track.
 ══════════════════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════════════════
-   SELECTED WORKS — reference card style
-   Black bg. Tall white rounded card. Mono text top. Image bottom.
+   SELECTED WORKS — full-screen card carousel, reference style
 ══════════════════════════════════════════════════════════════ */
 .works {
   background: var(--black);
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 4rem;
+  padding-bottom: 3rem;
 }
 
 .works-header {
@@ -389,12 +389,14 @@ button {
   overflow: hidden;
 }
 
-/* Track — cards align at top, consistent tall height */
+/*
+  TRACK — no padding, cards use own margins to create visible gap
+*/
 .track {
   display: flex;
-  align-items: flex-start;
-  gap: clamp(1.2rem, 2.5vw, 2rem);
-  padding: 3rem var(--gutter) 2rem;
+  align-items: stretch;
+  gap: 0;
+  padding: 2.5rem 0;
   overflow-x: scroll;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -406,10 +408,14 @@ button {
 .track::-webkit-scrollbar { display: none; }
 
 /*
-  THE CARD — reference style:
-  • Large white card with rounded corners
-  • Monospaced text block at top with generous whitespace
-  • Image flush at bottom filling remaining space
+  CARD — fills ~90% of viewport width, one card per view.
+  Background is warm off-white (#f8f6f1) which is close to
+  watercolor paper and blends with the image edges naturally.
+  Layout (top to bottom):
+    1. Title         — Courier, top
+    2. Description   — Courier, fills space
+    3. Meta + Price  — small row just above image
+    4. Image         — flush, fills all remaining height
 */
 .card {
   flex-shrink: 0;
@@ -417,123 +423,140 @@ button {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  background: var(--white);
-  border-radius: 16px;
+
+  /* ~90vw so one card = one full screen view */
+  width: 88vw;
+  max-width: 1080px;
+  /* Left margin creates the visible gap between cards */
+  margin-left: 6vw;
+  height: clamp(560px, 88vh, 940px);
+
+  /* Warm off-white paper tone — blends with artwork backgrounds */
+  background: #f8f6f1;
+  border-radius: 20px;
   overflow: hidden;
-  /* Portrait base width */
-  width: clamp(320px, 42vw, 560px);
-  /* Very tall — like a physical card you hold */
-  height: clamp(640px, 92vh, 980px);
+
   box-shadow:
-    0 2px 6px rgba(0,0,0,0.25),
-    0 20px 60px rgba(0,0,0,0.55);
-  transition: box-shadow 0.3s linear, transform 0.3s linear;
+    0 1px 4px rgba(0,0,0,0.12),
+    0 12px 40px rgba(0,0,0,0.35);
+  transition: box-shadow 0.3s linear;
 }
+
+.card:last-of-type { margin-right: 6vw; }
 
 .card:hover {
   box-shadow:
-    0 4px 14px rgba(0,0,0,0.3),
-    0 28px 72px rgba(0,0,0,0.65);
-  transform: translateY(-4px);
+    0 2px 8px rgba(0,0,0,0.16),
+    0 20px 56px rgba(0,0,0,0.45);
 }
 
-/* Landscape cards — wider */
-.card[data-orient="landscape"] {
-  width: clamp(420px, 58vw, 760px);
-}
-
-/* Bruma 50×25 — very wide */
-.card[data-title="Bruma"] {
-  width: clamp(460px, 62vw, 820px);
-}
-
-/* ── Text block — top, mono, large breathing room ── */
+/*
+  TEXT AREA — fixed height block, three rows:
+  title → description (flex:1) → footer row
+*/
 .card-cap {
-  padding: clamp(1.6rem, 3vw, 2.4rem) clamp(1.6rem, 3vw, 2.4rem) clamp(1.2rem, 2vw, 1.8rem);
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  /* Big enough for title + year + medium + description — matches reference */
-  min-height: clamp(200px, 30vh, 320px);
+  padding: clamp(1.4rem, 2.8vw, 2.2rem);
+  padding-bottom: 0;
+  flex-shrink: 0;
+  height: clamp(190px, 30vh, 320px);
   border: none;
   margin: 0;
+}
+
+/* 1. TITLE — top, most visible */
+.card-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.85rem, 1.3vw, 1.05rem);
+  font-weight: 400;
+  color: #0d0b08;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+  margin-bottom: clamp(0.5rem, 1.2vh, 1rem);
   flex-shrink: 0;
 }
 
-/* Title — prominent, slightly larger than reference */
-.card-title {
-  font-family: 'Courier New', Courier, monospace;
-  font-style: normal;
-  font-size: clamp(0.82rem, 1.1vw, 1rem);
-  font-weight: 400;
-  color: var(--ink);
-  line-height: 1.5;
-  text-transform: capitalize;
-  letter-spacing: 0.01em;
-  margin-bottom: 0.1rem;
-}
-
-/* Year — same line weight as reference secondary text */
-.card-year {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: clamp(0.72rem, 0.95vw, 0.84rem);
-  color: var(--mid);
-  letter-spacing: 0.01em;
-}
-
-/* Medium + dims */
-.card-medium {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: clamp(0.68rem, 0.9vw, 0.8rem);
-  color: var(--mid);
-  letter-spacing: 0.01em;
-  line-height: 1.55;
-  white-space: normal;
-}
-
-/* Description — wraps naturally like the reference caption block */
+/* 2. DESCRIPTION — grows to fill remaining text space */
 .card-desc {
   font-family: 'Courier New', Courier, monospace;
-  font-size: clamp(0.66rem, 0.88vw, 0.78rem);
-  color: var(--ink);
+  font-size: clamp(0.65rem, 0.95vw, 0.78rem);
+  color: #0d0b08;
   letter-spacing: 0.01em;
-  line-height: 1.7;
-  white-space: normal;
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  line-height: 1.75;
+  flex: 1;
+  overflow: hidden;
+  /* Fade out if text overflows */
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 
-/* Price — sits below description, visually distinct */
+/* 3. FOOTER ROW — year+medium left, price right — sits just above image */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.75rem clamp(1.4rem, 2.8vw, 2.2rem);
+  border-top: 1px solid rgba(0,0,0,0.09);
+  flex-shrink: 0;
+  background: #f8f6f1;
+}
+
+.card-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.card-year {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.6rem, 0.85vw, 0.73rem);
+  color: #0d0b08;
+  letter-spacing: 0.01em;
+}
+
+.card-medium {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.58rem, 0.82vw, 0.7rem);
+  color: #0d0b08;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+/* Price — far right */
 .card-price {
   font-family: 'Courier New', Courier, monospace;
-  font-size: clamp(0.7rem, 0.92vw, 0.82rem);
-  color: var(--ink);
+  font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+  color: #0d0b08;
   letter-spacing: 0.04em;
-  margin-top: 0.7rem;
   font-weight: 400;
+  white-space: nowrap;
+  text-align: right;
+  align-self: flex-end;
 }
 
 .card-price--nfs {
-  color: var(--mid);
+  color: #888278;
   font-style: italic;
 }
 
 .card-price--sold {
-  color: var(--accent);
-  letter-spacing: 0.08em;
+  color: #a51c30;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-size: clamp(0.62rem, 0.82vw, 0.74rem);
+  font-size: clamp(0.58rem, 0.8vw, 0.7rem);
 }
 
-/* ── Image — flush bottom, fills all remaining space ── */
+/* IMAGE — fills all remaining card height, flush to edges */
 .card-img-wrap {
   flex: 1;
   overflow: hidden;
-  background: #f0ede8;
+  /* Same warm paper — image edges dissolve into background */
+  background: #f8f6f1;
   display: block;
   position: relative;
-  min-height: 0; /* allows flex child to shrink */
+  min-height: 0;
 }
 
 .card-img-wrap img {
@@ -546,12 +569,12 @@ button {
   display: block;
 }
 
-/* Fade edges on black bg */
+/* Fade edges — subtle on black bg */
 .carousel-fade-left,
 .carousel-fade-right {
   position: absolute;
   top: 0; bottom: 0;
-  width: clamp(1rem, 2vw, 2rem);
+  width: 3vw;
   pointer-events: none;
   z-index: 2;
 }
@@ -596,7 +619,6 @@ button {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-
 .carousel-arrow:hover    { color: rgba(255,255,255,0.95); }
 .carousel-arrow:disabled { color: rgba(255,255,255,0.08); pointer-events: none; }
 .carousel-arrow--prev { left: 0.25rem; }
