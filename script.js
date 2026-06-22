@@ -1,359 +1,943 @@
-/*  IVAN AYUSO — script.js
-    Escrito para máxima compatibilidad móvil:
-    iOS Safari 12+, Android Chrome, desktop.
-    Sin arrow functions. Sin const/let. Sin pointer events.
-    Touch events nativos para swipe en móvil.
+
+/* ═══════════════════════════════════════════════════════════════
+   IVAN AYUSO — style.css
+   Optimizado para móvil: sin filter en cards, sin backdrop-filter,
+   will-change solo donde es necesario y por tiempo limitado.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --white:      #ffffff;
+  --off-white:  #f5f3ef;
+  --paper:      #eeebe4;
+  --dust:       #ccc9c0;
+  --mid:        #888278;
+  --ink-soft:   #555249;
+  --ink:        #1a1814;
+  --black:      #0b0a09;
+  --ochre:      #c8922a;
+  --ochre-dark: #b07d1a;
+  --garnet:     #5a0f0f;
+  --accent:     #c0392b;
+
+  --f-cursive:  'Pinyon Script', cursive;
+  --f-display:  'Cormorant Garamond', Georgia, serif;
+  --f-body:     'EB Garamond', Georgia, serif;
+
+  /* Easings simples — más rápidos de calcular en móvil */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-std:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --gutter: clamp(1.5rem, 5vw, 4.5rem);
+  --max:    1400px;
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Prevent iOS rubber-band scroll lag */
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: clamp(1rem, 1vw, 1.05rem);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img    { display: block; max-width: 100%; height: auto; }
+a      { color: inherit; text-decoration: none; }
+ul     { list-style: none; }
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  /* Elimina delay de 300ms en iOS */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   NAV
+   Sin backdrop-filter — costoso en móvil. Fondo sólido semiopaco.
+══════════════════════════════════════════════════════════════ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem var(--gutter);
+  border-bottom: 1px solid transparent;
+  /* Solo transicionar background y border — no transform */
+  transition: background 0.3s linear, border-color 0.3s linear;
+}
+
+.nav.scrolled {
+  /* Fondo sólido en vez de blur — mucho más rápido */
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom-color: var(--ink);
+}
+
+.nav-name {
+  font-family: var(--f-cursive);
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  position: relative;
+  z-index: 101;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.nav-links a {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mid);
+  position: relative;
+  transition: color 0.2s;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.25s var(--ease-out);
+}
+
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { width: 100%; }
+
+
+/* ── Hamburger ── */
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  /* 44×44 mínimo recomendado por Apple para touch targets */
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  position: relative;
+  z-index: 200;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.nav-burger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 1px;
+  /* Solo transform y opacity — ambas en GPU, sin layout */
+  transition: transform 0.28s var(--ease-out), opacity 0.28s;
+  transform-origin: center;
+}
+
+.nav-burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { transform: translateY(-6.5px) rotate(-45deg); }
+
+
+/* ── Mobile overlay ── */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  /* Color sólido — sin blur, sin transparencia costosa */
+  background: #ffffff;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* Solo opacity — propiedad GPU, no causa layout */
+  opacity: 0;
+  transition: opacity 0.3s linear;
+  border-top: 2px solid var(--ink);
+}
+
+.mobile-overlay.open { opacity: 1; }
+
+.mobile-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+}
+
+.mobile-links a {
+  font-family: var(--f-display);
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════════════════════ */
+
+/* "Portfolio" label — top right, crimson Apple style */
+.hero-portfolio-label {
+  position: absolute;
+  top: clamp(4.5rem, 8vw, 5.5rem);
+  right: var(--gutter);
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a51c30;
+  opacity: 0;
+  animation: riseIn 0.8s 1.3s var(--ease-out) forwards;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: var(--white);
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+}
+
+.hero-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  padding: 8rem var(--gutter) 3rem;
+  gap: 2rem;
+}
+
+.hero-name {
+  font-family: var(--f-cursive);
+  font-weight: 400;
+  font-size: clamp(5rem, 13vw, 12rem);
+  line-height: 1;
+  color: var(--black);
+  grid-column: 1;
+  align-self: end;
+  opacity: 0;
+  /* translate solo en Y — una sola propiedad GPU */
+  transform: translateY(20px);
+  animation: riseIn 1s 0.1s var(--ease-out) forwards;
+}
+
+.hero-right {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: riseIn 0.9s 0.45s var(--ease-out) forwards;
+}
+
+.hero-line {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.5rem, 3vw, 2.6rem);
+  color: var(--ink);
+  text-align: right;
+  line-height: 1.15;
+}
+
+.hero-origin {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--dust);
+  text-align: right;
+}
+
+.hero-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem var(--gutter);
+  border-top: 1px solid var(--ink);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mid);
+  opacity: 0;
+  animation: riseIn 0.7s 0.85s var(--ease-out) forwards;
+}
+
+.hero-bar::before {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.hero-down {
+  position: absolute;
+  bottom: 4.5rem;
+  right: var(--gutter);
+  color: var(--dust);
+  transition: color 0.2s;
+  opacity: 0;
+  animation: riseIn 0.6s 1.1s var(--ease-out) forwards;
+  writing-mode: vertical-rl;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-down:hover { color: var(--ink); }
+
+.hero-down svg {
+  transform: rotate(90deg);
+  animation: nudge 2.4s 1.5s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 100% { transform: rotate(90deg) translateX(0); }
+  50%       { transform: rotate(90deg) translateX(5px); }
+}
+
+@keyframes riseIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION EYEBROW
+══════════════════════════════════════════════════════════════ */
+.section-eyebrow {
+  display: inline-block;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SELECTED WORKS — carousel
+   Sin filter en imágenes — el efecto hover lo da opacity.
+   Sin will-change en cada card — solo en el track.
+══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   SELECTED WORKS — full-screen card carousel, reference style
+══════════════════════════════════════════════════════════════ */
+.works {
+  background: var(--black);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 3rem;
+}
+
+.works-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem var(--gutter);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.works-header .section-eyebrow {
+  color: rgba(255,255,255,0.95);
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+}
+
+.works-header::after {
+  content: 'Scroll →';
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.carousel-outer {
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+  TRACK — no padding, cards use own margins to create visible gap
 */
+.track {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 2.5rem 0;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.track::-webkit-scrollbar { display: none; }
 
-/* ─── 1. AÑO EN FOOTER ─────────────────────────────────────── */
-var yrEl = document.getElementById('yr');
-if (yrEl) { yrEl.textContent = new Date().getFullYear(); }
+/*
+  CARD — fills ~90% of viewport width, one card per view.
+  Background is warm off-white (#f8f6f1) which is close to
+  watercolor paper and blends with the image edges naturally.
+  Layout (top to bottom):
+    1. Title         — Courier, top
+    2. Description   — Courier, fills space
+    3. Meta + Price  — small row just above image
+    4. Image         — flush, fills all remaining height
+*/
+.card {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 
+  /* ~90vw so one card = one full screen view */
+  width: 88vw;
+  max-width: 1080px;
+  /* Left margin creates the visible gap between cards */
+  margin-left: 6vw;
+  height: clamp(560px, 88vh, 940px);
 
-/* ─── 2. NAV SCROLL ─────────────────────────────────────────── */
-var nav = document.getElementById('nav');
-window.addEventListener('scroll', function () {
-  if (window.pageYOffset > 50) {
-    nav.classList.add('scrolled');
-  } else {
-    nav.classList.remove('scrolled');
-  }
-}, { passive: true });
+  /* Warm off-white paper tone — blends with artwork backgrounds */
+  background: #f8f6f1;
+  border-radius: 20px;
+  overflow: hidden;
 
-
-/* ─── 3. MENÚ HAMBURGUESA ────────────────────────────────────── */
-var burger  = document.getElementById('navBurger');
-var overlay = document.getElementById('mobileOverlay');
-var mLinks  = document.getElementById('mobileLinks');
-var menuOpen = false;
-
-function openMenu() {
-  menuOpen = true;
-  burger.classList.add('open');
-  overlay.style.display = 'flex';
-  /* void para forzar reflow — necesario para que la transición CSS funcione */
-  void overlay.offsetWidth;
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.12),
+    0 12px 40px rgba(0,0,0,0.35);
+  transition: box-shadow 0.3s linear;
 }
 
-function closeMenu() {
-  menuOpen = false;
-  burger.classList.remove('open');
-  overlay.classList.remove('open');
-  /* Quitar pointer-events inmediatamente para que el tap pase al contenido */
-  overlay.style.pointerEvents = 'none';
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
-  setTimeout(function () {
-    if (!menuOpen) {
-      overlay.style.display = 'none';
-      overlay.style.pointerEvents = '';
-    }
-  }, 400);
+.card:last-of-type { margin-right: 6vw; }
+
+.card:hover {
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.16),
+    0 20px 56px rgba(0,0,0,0.45);
 }
 
-/* touchstart: respuesta inmediata en iOS sin delay de 300ms */
-burger.addEventListener('touchstart', function (e) {
-  e.preventDefault();
-  if (menuOpen) { closeMenu(); } else { openMenu(); }
-}, { passive: false });
-
-/* click: fallback para desktop */
-burger.addEventListener('click', function () {
-  if (menuOpen) { closeMenu(); } else { openMenu(); }
-});
-
-/* Cerrar al tocar un link y navegar a la sección */
-if (mLinks) {
-  var mlA = mLinks.querySelectorAll('a');
-  for (var i = 0; i < mlA.length; i++) {
-    mlA[i].addEventListener('touchstart', function (e) {
-      e.preventDefault(); /* evita el delay de 300ms */
-      var href = this.getAttribute('href');
-      closeMenu();
-      /* Pequeño delay para que el overlay suelte el scroll */
-      setTimeout(function () {
-        var target = href ? document.querySelector(href) : null;
-        if (target) {
-          var offset = nav ? nav.offsetHeight + 8 : 8;
-          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: top, behavior: 'smooth' });
-        }
-      }, 50);
-    }, { passive: false });
-
-    mlA[i].addEventListener('click', function (e) {
-      e.preventDefault();
-      var href = this.getAttribute('href');
-      closeMenu();
-      setTimeout(function () {
-        var target = href ? document.querySelector(href) : null;
-        if (target) {
-          var offset = nav ? nav.offsetHeight + 8 : 8;
-          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: top, behavior: 'smooth' });
-        }
-      }, 50);
-    });
-  }
+/*
+  TEXT AREA — fixed height block, three rows:
+  title → description (flex:1) → footer row
+*/
+.card-cap {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.4rem, 2.8vw, 2.2rem);
+  padding-bottom: 0;
+  flex-shrink: 0;
+  height: clamp(190px, 30vh, 320px);
+  border: none;
+  margin: 0;
 }
 
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && menuOpen) { closeMenu(); }
-});
+/* 1. TITLE — top, most visible */
+.card-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.85rem, 1.3vw, 1.05rem);
+  font-weight: 400;
+  color: #0d0b08;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  text-transform: capitalize;
+  margin-bottom: clamp(0.5rem, 1.2vh, 1rem);
+  flex-shrink: 0;
+}
+
+/* 2. DESCRIPTION — grows to fill remaining text space */
+.card-desc {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.65rem, 0.95vw, 0.78rem);
+  color: #0d0b08;
+  letter-spacing: 0.01em;
+  line-height: 1.75;
+  flex: 1;
+  overflow: hidden;
+  /* Fade out if text overflows */
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+/* 3. FOOTER ROW — year+medium left, price right — sits just above image */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.75rem clamp(1.4rem, 2.8vw, 2.2rem);
+  border-top: 1px solid rgba(0,0,0,0.09);
+  flex-shrink: 0;
+  background: #f8f6f1;
+}
+
+.card-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.card-year {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.6rem, 0.85vw, 0.73rem);
+  color: #0d0b08;
+  letter-spacing: 0.01em;
+}
+
+.card-medium {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.58rem, 0.82vw, 0.7rem);
+  color: #0d0b08;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+/* Price — far right */
+.card-price {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+  color: #0d0b08;
+  letter-spacing: 0.04em;
+  font-weight: 400;
+  white-space: nowrap;
+  text-align: right;
+  align-self: flex-end;
+}
+
+.card-price--nfs {
+  color: #888278;
+  font-style: italic;
+}
+
+.card-price--sold {
+  color: #a51c30;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: clamp(0.58rem, 0.8vw, 0.7rem);
+}
+
+/* IMAGE — fills all remaining card height, flush to edges */
+.card-img-wrap {
+  flex: 1;
+  overflow: hidden;
+  /* Same warm paper — image edges dissolve into background */
+  background: #f8f6f1;
+  display: block;
+  position: relative;
+  min-height: 0;
+}
+
+.card-img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* Fade edges — subtle on black bg */
+.carousel-fade-left,
+.carousel-fade-right {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 3vw;
+  pointer-events: none;
+  z-index: 2;
+}
+.carousel-fade-left  { left: 0;  background: linear-gradient(to right, var(--black), transparent); }
+.carousel-fade-right { right: 0; background: linear-gradient(to left,  var(--black), transparent); }
+
+/* Progress bar */
+.carousel-nav { padding: 1.5rem var(--gutter) 0; }
+.carousel-dots { display: none; }
+.carousel-btns { display: none; }
+
+.carousel-bar-track {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  position: relative;
+}
+
+.carousel-bar-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.55);
+  transition: width 0.2s linear;
+  width: 0%;
+}
+
+/* Side arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  color: rgba(255,255,255,0.45);
+  font-size: 1.3rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.carousel-arrow:hover    { color: rgba(255,255,255,0.95); }
+.carousel-arrow:disabled { color: rgba(255,255,255,0.08); pointer-events: none; }
+.carousel-arrow--prev { left: 0.25rem; }
+.carousel-arrow--next { right: 0.25rem; }
+
+/* ══════════════════════════════════════════════════════════════
+   SKETCHBOOK — reduced collage, tight, no gaps
+══════════════════════════════════════════════════════════════ */
+.sketchbook {
+  background: var(--black);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sketchbook-header {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  padding: 1.4rem var(--gutter);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sketchbook-header .section-eyebrow {
+  color: rgba(255,255,255,0.95);
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+}
+
+.sketchbook-note {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  font-weight: 300;
+  color: rgba(255,255,255,0.3);
+}
+
+.sketchbook-collage {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  width: 100%;
+  background: var(--black);
+}
+
+.sk-item {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: var(--black);
+  cursor: pointer;
+  opacity: 0.82;
+  transition: transform 0.3s var(--ease-out), opacity 0.25s linear;
+  transform-origin: center;
+  position: relative;
+  z-index: 1;
+  vertical-align: top;
+}
+
+.sk-item:hover {
+  transform: scale(1.06);
+  opacity: 1;
+  z-index: 10;
+}
+
+/* Size classes */
+.sk-a { grid-column: span 2; }
+.sk-b { grid-column: span 1; }
+.sk-c { grid-column: span 1; }
+.sk-d { grid-column: span 2; }
+.sk-e { grid-column: span 1; }
+.sk-f { grid-column: span 2; }
 
 
-/* ─── 4. SMOOTH SCROLL ──────────────────────────────────────── */
-var anchorEls = document.querySelectorAll('a[href^="#"]');
-for (var ai = 0; ai < anchorEls.length; ai++) {
-  anchorEls[ai].addEventListener('click', function (e) {
-    var id = this.getAttribute('href');
-    if (!id || id === '#') { return; }
-    var target = document.querySelector(id);
-    if (!target) { return; }
-    e.preventDefault();
-    var offset = nav ? nav.offsetHeight + 8 : 8;
-    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  });
+/* ══════════════════════════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════════════════════════ */
+.contact { background: var(--ink); color: var(--white); }
+
+.contact-inner { max-width: var(--max); margin: 0 auto; }
+
+.contact-inner .section-eyebrow {
+  display: block;
+  padding: 1.4rem var(--gutter);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.25);
+}
+
+.contact-links { display: flex; flex-direction: column; }
+
+.contact-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem var(--gutter);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  gap: 1rem;
+  touch-action: manipulation;
+}
+
+.contact-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.contact-value {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1;
+}
+
+/* Clase especial para mostrar ceros sin ambigüedad */
+.zero-safe {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-style: italic;
+  font-variant-numeric: slashed-zero;
+  font-feature-settings: "zero" 1, "onum" 0;
 }
 
 
-/* ─── 5. SCROLL REVEAL ──────────────────────────────────────── */
-(function () {
-  var sels = ['.works-header','.sketchbook-header','.about-inner','.contact-inner'];
-  for (var i = 0; i < sels.length; i++) {
-    var found = document.querySelectorAll(sels[i]);
-    for (var j = 0; j < found.length; j++) { found[j].classList.add('will-reveal'); }
-  }
-  var sk = document.querySelectorAll('.sk-item');
-  for (var k = 0; k < sk.length; k++) {
-    sk[k].classList.add('will-reveal');
-    sk[k].style.transitionDelay = ((k % 6) * 0.07) + 's';
-  }
-  if (!window.IntersectionObserver) {
-    var all = document.querySelectorAll('.will-reveal');
-    for (var m = 0; m < all.length; m++) { all[m].classList.add('revealed'); }
-    return;
-  }
-  var io = new IntersectionObserver(function (entries) {
-    for (var n = 0; n < entries.length; n++) {
-      if (entries[n].isIntersecting) {
-        entries[n].target.classList.add('revealed');
-        io.unobserve(entries[n].target);
-      }
-    }
-  }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
-  var rv = document.querySelectorAll('.will-reveal');
-  for (var r = 0; r < rv.length; r++) { io.observe(rv[r]); }
-}());
+/* ══════════════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════════════ */
+.footer {
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 1.2rem var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-name {
+  font-family: var(--f-cursive);
+  font-weight: 400;
+  font-size: 1.4rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.footer-copy {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.15);
+}
 
 
-/* ─── 6. CARRUSEL ───────────────────────────────────────────────
-   El navegador maneja el swipe nativo en móvil gracias a
-   overflow-x: scroll + scroll-snap. Nosotros solo manejamos:
-   • barra de progreso
-   • botones de flecha
-   • drag con mouse en desktop
-────────────────────────────────────────────────────────────── */
-(function () {
-  var track   = document.getElementById('track');
-  var prevBtn = document.getElementById('carouselPrev');
-  var nextBtn = document.getElementById('carouselNext');
-  var barFill = document.getElementById('carouselBarFill');
-  if (!track) { return; }
+/* ══════════════════════════════════════════════════════════════
+   LIGHTBOX — garnet
+   Sin box-shadow durante la transición — se añade después.
+══════════════════════════════════════════════════════════════ */
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--garnet);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1.2rem;
+  /* Solo opacity — una propiedad GPU */
+  transition: opacity 0.3s linear;
+}
 
-  function updateBar() {
-    if (!barFill) { return; }
-    var max = track.scrollWidth - track.clientWidth;
-    barFill.style.width = (max > 0 ? (track.scrollLeft / max) * 100 : 0) + '%';
-  }
+.lb.open { opacity: 1; pointer-events: all; }
 
-  function updateBtns() {
-    if (prevBtn) { prevBtn.disabled = track.scrollLeft < 4; }
-    if (nextBtn) { nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4; }
-  }
+.lb-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+}
 
-  /* Scroll listener — rAF throttled */
-  var raf = null;
-  function onTrackScroll() {
-    if (raf) { return; }
-    raf = requestAnimationFrame(function () {
-      raf = null;
-      updateBar();
-      updateBtns();
-    });
-  }
-  track.addEventListener('scroll', onTrackScroll, { passive: true });
+.lb-img {
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  display: block;
+  opacity: 0;
+  /* Solo opacity para la transición de entrada — sin transform scale */
+  transition: opacity 0.4s linear;
+}
 
-  /* Flechas — click y touchstart */
-  function attachArrow(btn, dir) {
-    if (!btn) { return; }
-    function fire(e) {
-      if (e.type === 'touchstart') { e.preventDefault(); }
-      track.scrollBy({ left: dir * track.clientWidth * 0.82, behavior: 'smooth' });
-    }
-    btn.addEventListener('touchstart', fire, { passive: false });
-    btn.addEventListener('click', fire);
-  }
-  attachArrow(prevBtn, -1);
-  attachArrow(nextBtn,  1);
+.lb.open .lb-img { opacity: 1; }
 
-  updateBar();
-  updateBtns();
+.lb-caption {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
 
-  /* Drag con mouse (solo desktop) */
-  var dragging = false;
-  var mx0 = 0, sl0 = 0, mdx = 0;
+.lb-title {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.9);
+}
 
-  track.addEventListener('mousedown', function (e) {
-    if (e.button !== 0) { return; }
-    dragging = true; mx0 = e.clientX; sl0 = track.scrollLeft; mdx = 0;
-    track.style.cursor = 'grabbing';
-    track.style.userSelect = 'none';
-  });
-  document.addEventListener('mousemove', function (e) {
-    if (!dragging) { return; }
-    mdx = e.clientX - mx0;
-    track.scrollLeft = sl0 - mdx;
-  });
-  document.addEventListener('mouseup', function () {
-    if (!dragging) { return; }
-    dragging = false;
-    track.style.cursor = '';
-    track.style.userSelect = '';
-  });
-  /* Evitar que drag abra lightbox */
-  track.addEventListener('click', function (e) {
-    if (Math.abs(mdx) > 8) { e.stopPropagation(); mdx = 0; }
-  }, true);
-}());
+.lb-meta {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+
+.lb-size {
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.25);
+}
+
+.lb-close, .lb-prev, .lb-next {
+  position: absolute;
+  color: rgba(255,255,255,0.5);
+  /* 44×44 touch target */
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lb-close:hover, .lb-prev:hover, .lb-next:hover { color: rgba(255,255,255,0.95); }
+.lb-close { top: 1rem; right: 1rem; font-size: 1rem; }
+.lb-prev  { left: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
+.lb-next  { right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }
 
 
-/* ─── 7. LIGHTBOX ───────────────────────────────────────────────
-   Abre al tap/click en .card o .sk-item.
-   Swipe horizontal para ir a la imagen siguiente/anterior.
-   Distingue tap de swipe para no abrir accidentalmente.
-────────────────────────────────────────────────────────────── */
-(function () {
-  var lb         = document.getElementById('lb');
-  var lbImg      = document.getElementById('lbImg');
-  var lbTitleEl  = document.getElementById('lbTitle');
-  var lbMetaEl   = document.getElementById('lbMeta');
-  var lbCloseBtn = document.getElementById('lbClose');
-  var lbPrevBtn  = document.getElementById('lbPrev');
-  var lbNextBtn  = document.getElementById('lbNext');
-  if (!lb || !lbImg) { return; }
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   Solo opacity + translateY — ambas en GPU, no causan layout.
+══════════════════════════════════════════════════════════════ */
+.will-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.will-reveal.revealed { opacity: 1; transform: translateY(0); }
 
-  /* Construir lista de items */
-  var items = [];
-  var cardEls   = document.querySelectorAll('.card');
-  var sketchEls = document.querySelectorAll('.sk-item');
 
-  for (var ci = 0; ci < cardEls.length; ci++) {
-    var cimg = cardEls[ci].querySelector('img');
-    items.push({
-      src:    cimg ? cimg.src : '',
-      title:  cardEls[ci].getAttribute('data-title')  || '',
-      medium: cardEls[ci].getAttribute('data-medium') || ''
-    });
-  }
-  for (var si = 0; si < sketchEls.length; si++) {
-    items.push({ src: sketchEls[si].src, title: '', medium: '' });
-  }
-
-  var current = 0;
-
-  function lbOpen(index) {
-    current = Math.max(0, Math.min(index, items.length - 1));
-    var item = items[current];
-    lbImg.style.opacity   = '0';
-    lbImg.style.transform = 'scale(0.94)';
-    lbImg.src = item.src;
-    lbImg.alt = item.title;
-    if (lbTitleEl) { lbTitleEl.textContent = item.title; }
-    if (lbMetaEl)  { lbMetaEl.textContent  = item.medium; }
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        lbImg.style.opacity   = '';
-        lbImg.style.transform = '';
-      });
-    });
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — tablet ≤ 900px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hero-body {
+    grid-template-columns: 1fr;
+    padding-top: 9rem;
+    gap: 1.5rem;
   }
 
-  function lbClose() {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
+  .hero-right { grid-column: 1; align-items: flex-start; }
+  .hero-line, .hero-origin { text-align: left; }
+  .hero-down { display: none; }
+
+  .about-inner { grid-template-columns: 1fr; }
+
+  .about-label {
+    border-right: none;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+    padding: 2rem var(--gutter) 1.5rem;
   }
 
-  function lbGo(dir) { lbOpen((current + dir + items.length) % items.length); }
-
-  /* ── Attach a las cards ──
-     Usamos touchend para detectar tap limpio vs swipe en móvil.
-     swipeDx guarda el desplazamiento horizontal del toque.
-  ── */
-  var swipeDx = 0;
-
-  function attachItem(el, index) {
-    el.style.cursor = 'pointer';
-
-    el.addEventListener('touchstart', function (e) {
-      swipeDx = e.touches[0].clientX;
-    }, { passive: true });
-
-    el.addEventListener('touchend', function (e) {
-      var dx = e.changedTouches[0].clientX - swipeDx;
-      /* Solo abrir si no fue un swipe (< 12px de movimiento) */
-      if (Math.abs(dx) < 12) {
-        e.preventDefault();
-        lbOpen(index);
-      }
-    }, { passive: false });
-
-    /* click para desktop */
-    el.addEventListener('click', function () { lbOpen(index); });
+  .about-label .section-eyebrow {
+    writing-mode: horizontal-tb;
+    transform: none;
   }
 
-  for (var cai = 0; cai < cardEls.length; cai++) {
-    attachItem(cardEls[cai], cai);
-  }
-  var skOff = cardEls.length;
-  for (var sai = 0; sai < sketchEls.length; sai++) {
-    attachItem(sketchEls[sai], skOff + sai);
-  }
+  .about-text { padding: 2.5rem var(--gutter); }
+  .sketchbook-scatter { columns: 2; }
 
-  /* ── Controles del lightbox ── */
-  function attachLbBtn(btn, fn) {
-    if (!btn) { return; }
-    btn.addEventListener('touchstart', function (e) { e.preventDefault(); fn(); }, { passive: false });
-    btn.addEventListener('click', fn);
-  }
-  attachLbBtn(lbCloseBtn, lbClose);
-  attachLbBtn(lbPrevBtn,  function () { lbGo(-1); });
-  attachLbBtn(lbNextBtn,  function () { lbGo(+1); });
+  .sketchbook-collage { grid-template-columns: repeat(3, 1fr); }
+  .sk-a, .sk-d, .sk-f { grid-column: span 2; }
+  .sk-b, .sk-c, .sk-e { grid-column: span 1; }
+}
 
-  lb.addEventListener('click', function (e) { if (e.target === lb) { lbClose(); } });
 
-  document.addEventListener('keydown', function (e) {
-    if (!lb.classList.contains('open')) { return; }
-    if (e.key === 'Escape')     { lbClose(); }
-    if (e.key === 'ArrowLeft')  { lbGo(-1); }
-    if (e.key === 'ArrowRight') { lbGo(+1); }
-  });
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — móvil ≤ 680px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 680px) {
+  .nav-links  { display: none; }
+  .nav-burger { display: flex; }
+  .mobile-overlay { display: flex; opacity: 0; }
+  /* ocultarlo visualmente, JS controla display */
+  .mobile-overlay:not(.open) { display: none; }
 
-  /* ── Swipe dentro del lightbox ── */
-  var lbTx = 0;
-  lb.addEventListener('touchstart', function (e) {
-    lbTx = e.touches[0].clientX;
-  }, { passive: true });
-  lb.addEventListener('touchend', function (e) {
-    var dx = e.changedTouches[0].clientX - lbTx;
-    if (Math.abs(dx) > 50) { lbGo(dx < 0 ? 1 : -1); }
-  }, { passive: true });
-}());
+  .hero-bar { flex-wrap: wrap; gap: 0.5rem; }
+
+  .contact-link { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+  .contact-label { width: auto; }
+  .contact-value { font-size: clamp(1.4rem, 8vw, 2rem); }
+
+  .sketchbook-scatter { columns: 1; }
+
+  .sketchbook-collage { grid-template-columns: repeat(2, 1fr); }
+  .sk-a, .sk-b, .sk-c, .sk-d, .sk-e, .sk-f { grid-column: span 1; }
+  .sk-a, .sk-d, .sk-f { grid-column: span 2; }
+
+  .lb-caption { flex-direction: column; gap: 0.3rem; }
+}
