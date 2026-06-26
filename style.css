@@ -127,6 +127,36 @@ button {
 .nav-links a:hover::after { width: 100%; }
 
 
+/* Language toggle */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  position: relative;
+  z-index: 101;
+}
+
+.nav.scrolled .lang-toggle { color: var(--mid); }
+.lang-toggle:hover { color: var(--ink); }
+.nav.scrolled .lang-toggle:hover { color: var(--ink); }
+
+.lang-divider { opacity: 0.3; }
+
+.lang-es, .lang-en { transition: opacity 0.2s, font-weight 0.2s; }
+.lang-active { font-weight: 700; opacity: 1; }
+.lang-inactive { opacity: 0.4; }
+
 /* ── Hamburger ── */
 .nav-burger {
   display: none;
