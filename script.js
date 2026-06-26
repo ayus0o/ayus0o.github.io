@@ -356,3 +356,67 @@ for (var ai = 0; ai < anchorEls.length; ai++) {
     if (Math.abs(dx) > 50) { lbGo(dx < 0 ? 1 : -1); }
   }, { passive: true });
 }());
+
+
+/* ─── 8. LANGUAGE SWITCH ─────────────────────────────────────────
+   Toggles all data-es / data-en attributes across the page.
+   Default: Spanish. Toggle switches to English and back.
+   Prices: MXN ↔ USD at fixed rate of 17 MXN = 1 USD.
+────────────────────────────────────────────────────────────── */
+(function () {
+  var langToggle = document.getElementById('langToggle');
+  if (!langToggle) { return; }
+
+  var langEs  = langToggle.querySelector('.lang-es');
+  var langEn  = langToggle.querySelector('.lang-en');
+  var current = 'es'; /* default: Spanish */
+
+  function switchLang(lang) {
+    current = lang;
+
+    /* Update toggle appearance */
+    if (lang === 'en') {
+      langEs.classList.remove('lang-active');
+      langEs.classList.add('lang-inactive');
+      langEn.classList.add('lang-active');
+      langEn.classList.remove('lang-inactive');
+      document.documentElement.lang = 'en';
+    } else {
+      langEn.classList.remove('lang-active');
+      langEn.classList.add('lang-inactive');
+      langEs.classList.add('lang-active');
+      langEs.classList.remove('lang-inactive');
+      document.documentElement.lang = 'es';
+    }
+
+    /* Switch all elements that have data-es and data-en */
+    var els = document.querySelectorAll('[data-es][data-en]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var val = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-es');
+      if (val !== null) {
+        el.textContent = val;
+      }
+    }
+
+    /* Switch nav link text separately (they have href so textContent = just text node) */
+    var navLinks = document.querySelectorAll('a[data-es][data-en]');
+    for (var j = 0; j < navLinks.length; j++) {
+      var a = navLinks[j];
+      a.textContent = lang === 'en' ? a.getAttribute('data-en') : a.getAttribute('data-es');
+    }
+  }
+
+  langToggle.addEventListener('click', function () {
+    switchLang(current === 'es' ? 'en' : 'es');
+  });
+
+  langToggle.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    switchLang(current === 'es' ? 'en' : 'es');
+  }, { passive: false });
+
+  /* Init — set ES as active */
+  langEs.classList.add('lang-active');
+  langEn.classList.add('lang-inactive');
+}());
