@@ -1,422 +1,515 @@
-/*  IVAN AYUSO — script.js
-    iOS Safari 12+, Android Chrome, desktop.
-    Sin arrow functions. Sin const/let.
-*/
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ivan Ayuso — Works on Paper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-/* ─── 1. FOOTER YEAR ────────────────────────────────────────── */
-var yrEl = document.getElementById('yr');
-if (yrEl) { yrEl.textContent = new Date().getFullYear(); }
+<!-- ═══════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <a class="nav-name" href="#top">Ivan Ayuso</a>
+  <button class="lang-toggle" id="langToggle" aria-label="Switch language">
+    <span class="lang-es lang-active">ES</span>
+    <span class="lang-divider">/</span>
+    <span class="lang-en">EN</span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#works" data-es="Obras" data-en="Works">Obras</a></li>
+    <li><a href="#sketchbook" data-es="Bocetos" data-en="Sketchbook">Bocetos</a></li>
+    <li><a href="#contact" data-es="Contacto" data-en="Contact">Contacto</a></li>
+  </ul>
+  <button class="nav-burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false">
+    <span></span>
+    <span></span>
+  </button>
+</nav>
 
-
-/* ─── 2. NAV SCROLL ─────────────────────────────────────────── */
-var nav = document.getElementById('nav');
-window.addEventListener('scroll', function () {
-  if (window.pageYOffset > 50) {
-    nav.classList.add('scrolled');
-  } else {
-    nav.classList.remove('scrolled');
-  }
-}, { passive: true });
-
-
-/* ─── 3. HAMBURGER MENU ──────────────────────────────────────── */
-var burger   = document.getElementById('navBurger');
-var overlay  = document.getElementById('mobileOverlay');
-var mLinks   = document.getElementById('mobileLinks');
-var menuOpen = false;
-
-function openMenu() {
-  menuOpen = true;
-  burger.classList.add('open');
-  overlay.style.display = 'flex';
-  void overlay.offsetWidth; /* force reflow for CSS transition */
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
-}
-
-function closeMenu() {
-  menuOpen = false;
-  burger.classList.remove('open');
-  overlay.classList.remove('open');
-  overlay.style.pointerEvents = 'none';
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
-  setTimeout(function () {
-    if (!menuOpen) {
-      overlay.style.display = 'none';
-      overlay.style.pointerEvents = '';
-    }
-  }, 400);
-}
-
-burger.addEventListener('touchstart', function (e) {
-  e.preventDefault();
-  if (menuOpen) { closeMenu(); } else { openMenu(); }
-}, { passive: false });
-
-burger.addEventListener('click', function () {
-  if (menuOpen) { closeMenu(); } else { openMenu(); }
-});
-
-if (mLinks) {
-  var mlA = mLinks.querySelectorAll('a');
-  for (var i = 0; i < mlA.length; i++) {
-    mlA[i].addEventListener('touchstart', function (e) {
-      e.preventDefault();
-      var href = this.getAttribute('href');
-      closeMenu();
-      setTimeout(function () {
-        var target = href ? document.querySelector(href) : null;
-        if (target) {
-          var offset = nav ? nav.offsetHeight + 8 : 8;
-          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: top, behavior: 'smooth' });
-        }
-      }, 50);
-    }, { passive: false });
-
-    mlA[i].addEventListener('click', function (e) {
-      e.preventDefault();
-      var href = this.getAttribute('href');
-      closeMenu();
-      setTimeout(function () {
-        var target = href ? document.querySelector(href) : null;
-        if (target) {
-          var offset = nav ? nav.offsetHeight + 8 : 8;
-          var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: top, behavior: 'smooth' });
-        }
-      }, 50);
-    });
-  }
-}
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && menuOpen) { closeMenu(); }
-});
+<!-- Mobile menu overlay (separate from nav for z-index control) -->
+<div class="mobile-overlay" id="mobileOverlay" aria-hidden="true">
+  <ul class="mobile-links" id="mobileLinks">
+    <li><a href="#works" data-es="Obras" data-en="Works">Obras</a></li>
+    <li><a href="#sketchbook" data-es="Bocetos" data-en="Sketchbook">Bocetos</a></li>
+    <li><a href="#contact" data-es="Contacto" data-en="Contact">Contacto</a></li>
+  </ul>
+</div>
 
 
-/* ─── 4. SMOOTH SCROLL ──────────────────────────────────────── */
-var anchorEls = document.querySelectorAll('a[href^="#"]');
-for (var ai = 0; ai < anchorEls.length; ai++) {
-  anchorEls[ai].addEventListener('click', function (e) {
-    var id = this.getAttribute('href');
-    if (!id || id === '#') { return; }
-    var target = document.querySelector(id);
-    if (!target) { return; }
-    e.preventDefault();
-    var offset = nav ? nav.offsetHeight + 8 : 8;
-    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  });
-}
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section class="hero" id="top">
+
+  <!-- "Portfolio" label — top right, crimson Apple style -->
+  <span class="hero-portfolio-label">Portfolio</span>
+
+  <div class="hero-body">
+    <h1 class="hero-name">Ivan Ayuso</h1>
+    <div class="hero-right">
+      <p class="hero-line" data-es="Proyecto mi psique" data-en="I project my psyche">Proyecto mi psique</p>
+      <p class="hero-origin">El Paso · Ciudad Juárez</p>
+    </div>
+  </div>
+  <a class="hero-down" href="#works" aria-label="Scroll down">
+    <span data-es="Bajar" data-en="Scroll">Bajar</span>
+    <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
+      <line x1="7" y1="0" x2="7" y2="17" stroke="currentColor" stroke-width="1"/>
+      <polyline points="2,12 7,18 12,12" fill="none" stroke="currentColor" stroke-width="1"/>
+    </svg>
+  </a>
+</section>
 
 
-/* ─── 5. SCROLL REVEAL ──────────────────────────────────────── */
-(function () {
-  var sels = ['.works-header', '.sketchbook-header', '.contact-inner'];
-  for (var i = 0; i < sels.length; i++) {
-    var found = document.querySelectorAll(sels[i]);
-    for (var j = 0; j < found.length; j++) { found[j].classList.add('will-reveal'); }
-  }
-  var sk = document.querySelectorAll('.sk-item');
-  for (var k = 0; k < sk.length; k++) {
-    sk[k].classList.add('will-reveal');
-    sk[k].style.transitionDelay = ((k % 6) * 0.07) + 's';
-  }
-  if (!window.IntersectionObserver) {
-    var all = document.querySelectorAll('.will-reveal');
-    for (var m = 0; m < all.length; m++) { all[m].classList.add('revealed'); }
-    return;
-  }
-  var io = new IntersectionObserver(function (entries) {
-    for (var n = 0; n < entries.length; n++) {
-      if (entries[n].isIntersecting) {
-        entries[n].target.classList.add('revealed');
-        io.unobserve(entries[n].target);
-      }
-    }
-  }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
-  var rv = document.querySelectorAll('.will-reveal');
-  for (var r = 0; r < rv.length; r++) { io.observe(rv[r]); }
-}());
+<!-- ═══════════════════════════════════════════
+     SELECTED WORKS — horizontal carousel
+     ─ data-orient: "portrait" or "landscape"
+     ─ To add artworks: copy a <figure class="card">
+       block and update src, data-title, data-year,
+       data-medium, and data-orient.
+═══════════════════════════════════════════ -->
+<section class="works" id="works">
+  <header class="works-header">
+    <span class="section-eyebrow" data-es="Obras Seleccionadas" data-en="Selected Works">Obras Seleccionadas</span>
+  </header>
+
+  <div class="carousel-outer" id="carousel">
+    <div class="track" id="track">
+
+      <!-- ARTWORK 1 — Sentencia -->
+      <figure class="card" data-orient="landscape"
+        data-title="Sentencia"
+        data-year="2026"
+        data-medium="Acuarela sobre papel · 50 × 35 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sentencia</span>
+          <span class="card-desc" data-es="Tres vaqueros se detienen a mirar al espectador como si estuvieran chismeando algo. Esta obra busca expresar cómo la masculinidad puede ser algo que juzga y condiciona." data-en="Three cowboys stop to look at the viewer as if gossiping something. This work is meant to express how masculinity can be a judging and conditional thing.">Tres vaqueros se detienen a mirar al espectador como si estuvieran chismeando algo. Esta obra busca expresar cómo la masculinidad puede ser algo que juzga y condiciona.</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 50 × 35 cm"
+              data-en="Watercolor on paper · 50 × 35 cm">Acuarela sobre papel · 50 × 35 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$1,500 MXN"
+            data-en="$88 USD">$1,500 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork1.jpg" alt="Sentencia" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 2 — Mi amor -->
+      <figure class="card" data-orient="portrait"
+        data-title="Mi amor"
+        data-year="2026"
+        data-medium="Acuarela, gises y tinta negra sobre papel · 35 × 50 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Mi amor</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada durante una visita a una exposición de arte con Regina Vázquez como protagonista de la pintura. Ella es mi amor." data-en="This piece was done from a visit to an art exhibition with Regina Vazquez as the protagonist of the painting. She is my love.">Esta pieza fue realizada durante una visita a una exposición de arte con Regina Vázquez como protagonista de la pintura. Ella es mi amor.</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Acuarela, gises y tinta negra sobre papel · 35 × 50 cm"
+              data-en="Watercolor, chalk and black ink on paper · 35 × 50 cm">Acuarela, gises y tinta negra sobre papel · 35 × 50 cm</span>
+          </div>
+          <span class="card-price card-price--nfs"
+            data-es="No está a la venta"
+            data-en="Not for sale">No está a la venta</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork2.jpg" alt="Mi amor" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 3 — Reparo -->
+      <figure class="card" data-orient="portrait"
+        data-title="Reparo"
+        data-year="2025"
+        data-medium="Acuarela sobre papel · 43 × 35 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Reparo</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 43 × 35 cm"
+              data-en="Watercolor on paper · 43 × 35 cm">Acuarela sobre papel · 43 × 35 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$700 MXN"
+            data-en="$41 USD">$700 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork3.jpg" alt="Reparo" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 4 — Bruma -->
+      <figure class="card" data-orient="portrait"
+        data-title="Bruma"
+        data-year="2026"
+        data-medium="Acuarela sobre papel · 50 × 25 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Bruma</span>
+          <span class="card-desc" data-es="Los colores y la apariencia de esta imagen buscan retratar la belleza mexicana. Me gusta pensar que en mi propio mundo, donde el agua está limpia y la gente puede fumar en el parque de Juárez, México, esta pintura existe." data-en="The colors and appearance of this picture is meant to portrait mexican beauty. I like to think that in my own world where the water is clean and people can smoke inside the park of Juarez Mexico; this painting exists.">Los colores y la apariencia de esta imagen buscan retratar la belleza mexicana. Me gusta pensar que en mi propio mundo, donde el agua está limpia y la gente puede fumar en el parque de Juárez, México, esta pintura existe.</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 50 × 25 cm"
+              data-en="Watercolor on paper · 50 × 25 cm">Acuarela sobre papel · 50 × 25 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$1,500 MXN"
+            data-en="$88 USD">$1,500 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork5.jpg" alt="Bruma" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 5 — Sin título -->
+      <figure class="card" data-orient="landscape"
+        data-title="Sin título"
+        data-year="2024"
+        data-medium="Tinta azul sobre cartón · 76 × 52 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez." data-en="This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.">Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez.</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2024</span>
+            <span class="card-medium"
+              data-es="Tinta azul sobre cartón · 76 × 52 cm"
+              data-en="Blue ink on cardboard · 76 × 52 cm">Tinta azul sobre cartón · 76 × 52 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$650 MXN"
+            data-en="$38 USD">$650 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork8.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 6 — Distancia -->
+      <figure class="card" data-orient="landscape"
+        data-title="Distancia"
+        data-year="2026"
+        data-medium="Carbón y gis sobre papel · 70 × 50 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Distancia</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Carbón y gis sobre papel · 70 × 50 cm"
+              data-en="Charcoal and chalk on paper · 70 × 50 cm">Carbón y gis sobre papel · 70 × 50 cm</span>
+          </div>
+          <span class="card-price card-price--sold"
+            data-es="Vendido"
+            data-en="Sold">Vendido</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork9.jpg" alt="Distancia" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 7 — Sin título -->
+      <figure class="card" data-orient="landscape"
+        data-title="Sin título"
+        data-year="2024"
+        data-medium="Tinta azul sobre cartón · 76 × 51 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez." data-en="This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.">Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez.</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2024</span>
+            <span class="card-medium"
+              data-es="Tinta azul sobre cartón · 76 × 51 cm"
+              data-en="Blue ink on cardboard · 76 × 51 cm">Tinta azul sobre cartón · 76 × 51 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$650 MXN"
+            data-en="$38 USD">$650 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork10.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 8 — Mujer -->
+      <figure class="card" data-orient="landscape"
+        data-title="Mujer"
+        data-year="2026"
+        data-medium="Carbón sobre papel · 50 × 35 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Mujer</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 50 × 35 cm"
+              data-en="Charcoal on paper · 50 × 35 cm">Carbón sobre papel · 50 × 35 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$1,000 MXN"
+            data-en="$59 USD">$1,000 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork12.jpg" alt="Mujer" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 9 — Marilyn -->
+      <figure class="card" data-orient="portrait"
+        data-title="Marilyn"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Marilyn</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$600 MXN"
+            data-en="$35 USD">$600 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork13.jpg" alt="Marilyn" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 10 — Salvación -->
+      <figure class="card" data-orient="landscape"
+        data-title="Salvación"
+        data-year="2026"
+        data-medium="Carbón sobre papel · 54 × 47 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Salvación</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 54 × 47 cm"
+              data-en="Charcoal on paper · 54 × 47 cm">Carbón sobre papel · 54 × 47 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$850 MXN"
+            data-en="$50 USD">$850 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork14.jpg" alt="Salvación" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 11 — Sin título -->
+      <figure class="card" data-orient="portrait"
+        data-title="Sin título"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$700 MXN"
+            data-en="$41 USD">$700 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork15.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 12 — Sin título -->
+      <figure class="card" data-orient="portrait"
+        data-title="Sin título"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$600 MXN"
+            data-en="$35 USD">$600 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork16.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
+      <!--
+        ADD MORE ARTWORKS HERE:
+        <figure class="card" data-orient="portrait"
+          data-title="Título" data-year="2024"
+          data-medium="Técnica · W × H cm">
+          <figcaption class="card-cap">
+            <span class="card-title">Título</span>
+            <span class="card-desc" data-es="Descripción ES." data-en="Description EN.">Descripción ES.</span>
+          </figcaption>
+          <div class="card-footer">
+            <div class="card-footer-left">
+              <span class="card-year">2024</span>
+              <span class="card-medium" data-es="Técnica · W × H cm" data-en="Technique · W × H cm">Técnica · W × H cm</span>
+            </div>
+            <span class="card-price" data-es="$000 MXN" data-en="$00 USD">$000 MXN</span>
+          </div>
+          <div class="card-img-wrap">
+            <img src="images/artworkN.jpg" alt="Título" loading="lazy" />
+          </div>
+        </figure>
+      -->
+
+    </div><!-- /track -->
+    <div class="carousel-fade-left"></div>
+    <div class="carousel-fade-right"></div>
+
+    <!-- Side arrows — positioned absolute inside carousel-outer -->
+    <button class="carousel-arrow carousel-arrow--prev" id="carouselPrev" aria-label="Previous">&#8592;</button>
+    <button class="carousel-arrow carousel-arrow--next" id="carouselNext" aria-label="Next">&#8594;</button>
+  </div>
+
+  <!-- Progress bar below the carousel -->
+  <div class="carousel-nav">
+    <div class="carousel-bar-track">
+      <div class="carousel-bar-fill" id="carouselBarFill"></div>
+    </div>
+    <div class="carousel-dots" id="carouselDots"></div><!-- kept for JS compat, hidden in CSS -->
+    <div class="carousel-btns"></div><!-- kept for JS compat, hidden in CSS -->
+  </div>
+</section>
 
 
-/* ─── 6. CAROUSEL ───────────────────────────────────────────────
-   Cards are now full-screen width.
-   Arrows scroll exactly one card width (100% of card).
-   Swipe handled natively by the browser via scroll-snap.
-   Drag-to-scroll on desktop.
-────────────────────────────────────────────────────────────── */
-(function () {
-  var track   = document.getElementById('track');
-  var prevBtn = document.getElementById('carouselPrev');
-  var nextBtn = document.getElementById('carouselNext');
-  var barFill = document.getElementById('carouselBarFill');
-  if (!track) { return; }
-
-  var cards = track.querySelectorAll('.card');
-  var cardCount = cards.length;
-
-  /* Progress bar */
-  function updateBar() {
-    if (!barFill) { return; }
-    var max = track.scrollWidth - track.clientWidth;
-    barFill.style.width = (max > 0 ? (track.scrollLeft / max) * 100 : 0) + '%';
-  }
-
-  function updateBtns() {
-    if (prevBtn) { prevBtn.disabled = track.scrollLeft < 4; }
-    if (nextBtn) { nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4; }
-  }
-
-  /* Scroll to a specific card index */
-  function scrollToCard(index) {
-    if (index < 0) { index = 0; }
-    if (index >= cardCount) { index = cardCount - 1; }
-    var card = cards[index];
-    if (!card) { return; }
-    /* Scroll so the card's left edge aligns with track's left edge */
-    var trackLeft = track.getBoundingClientRect().left;
-    var cardLeft  = card.getBoundingClientRect().left;
-    var scrollBy  = cardLeft - trackLeft;
-    track.scrollBy({ left: scrollBy, behavior: 'smooth' });
-  }
-
-  /* Find which card is currently most visible */
-  function currentCardIndex() {
-    var trackLeft = track.getBoundingClientRect().left;
-    var closest = 0;
-    var closestDist = Infinity;
-    for (var i = 0; i < cardCount; i++) {
-      var dist = Math.abs(cards[i].getBoundingClientRect().left - trackLeft);
-      if (dist < closestDist) { closestDist = dist; closest = i; }
-    }
-    return closest;
-  }
-
-  /* Arrows — jump exactly one card */
-  function attachArrow(btn, dir) {
-    if (!btn) { return; }
-    function fire(e) {
-      if (e.type === 'touchstart') { e.preventDefault(); }
-      scrollToCard(currentCardIndex() + dir);
-    }
-    btn.addEventListener('touchstart', fire, { passive: false });
-    btn.addEventListener('click', fire);
-  }
-  attachArrow(prevBtn, -1);
-  attachArrow(nextBtn,  1);
-
-  /* Update bar + buttons on scroll */
-  var raf = null;
-  track.addEventListener('scroll', function () {
-    if (raf) { return; }
-    raf = requestAnimationFrame(function () {
-      raf = null;
-      updateBar();
-      updateBtns();
-    });
-  }, { passive: true });
-
-  /* Also update after touch ends (snap may still be settling) */
-  track.addEventListener('touchend', function () {
-    setTimeout(function () { updateBar(); updateBtns(); }, 350);
-  }, { passive: true });
-
-  updateBar();
-  updateBtns();
-
-  /* Drag-to-scroll on desktop */
-  var dragging = false;
-  var mx0 = 0, sl0 = 0, mdx = 0;
-
-  track.addEventListener('mousedown', function (e) {
-    if (e.button !== 0) { return; }
-    dragging = true;
-    mx0 = e.clientX; sl0 = track.scrollLeft; mdx = 0;
-    track.style.cursor = 'grabbing';
-    track.style.userSelect = 'none';
-  });
-
-  document.addEventListener('mousemove', function (e) {
-    if (!dragging) { return; }
-    mdx = e.clientX - mx0;
-    track.scrollLeft = sl0 - mdx;
-  });
-
-  document.addEventListener('mouseup', function () {
-    if (!dragging) { return; }
-    dragging = false;
-    track.style.cursor = '';
-    track.style.userSelect = '';
-    /* Snap to nearest card after drag */
-    scrollToCard(currentCardIndex());
-  });
-
-  /* Prevent accidental lightbox open after drag */
-  track.addEventListener('click', function (e) {
-    if (Math.abs(mdx) > 8) { e.stopPropagation(); mdx = 0; }
-  }, true);
-}());
+<!-- ═══════════════════════════════════════════
+     SKETCHBOOK
+     ─ Add images inside .sketchbook-scatter
+═══════════════════════════════════════════ -->
+<section class="sketchbook" id="sketchbook">
+  <header class="sketchbook-header">
+    <span class="section-eyebrow" data-es="Bocetos" data-en="Sketchbook">Bocetos</span>
+    <p class="sketchbook-note" data-es="Páginas, estudios, pensamientos inconclusos." data-en="Pages, studies, unfinished thoughts.">Páginas, estudios, pensamientos inconclusos.</p>
+  </header>
+  <div class="sketchbook-collage">
+    <img src="images/sketch1.jpg"  alt="" class="sk-item sk-b" loading="lazy" />
+    <img src="images/sketch2.jpg"  alt="" class="sk-item sk-f" loading="lazy" />
+    <img src="images/sketch3.jpg"  alt="" class="sk-item sk-c" loading="lazy" />
+    <img src="images/sketch4.jpg"  alt="" class="sk-item sk-a" loading="lazy" />
+    <img src="images/sketch5.jpg"  alt="" class="sk-item sk-d" loading="lazy" />
+    <img src="images/sketch6.jpg"  alt="" class="sk-item sk-e" loading="lazy" />
+    <img src="images/sketch7.jpg"  alt="" class="sk-item sk-a" loading="lazy" />
+    <img src="images/sketch8.jpg"  alt="" class="sk-item sk-f" loading="lazy" />
+    <img src="images/sketch9.jpg"  alt="" class="sk-item sk-c" loading="lazy" />
+    <img src="images/sketch10.jpg" alt="" class="sk-item sk-b" loading="lazy" />
+    <img src="images/sketch11.jpg" alt="" class="sk-item sk-d" loading="lazy" />
+    <img src="images/sketch12.jpg" alt="" class="sk-item sk-e" loading="lazy" />
+    <!--
+      AGREGAR MÁS PÁGINAS DEL SKETCHBOOK AQUÍ
+      Clases: sk-a (grande cuadrado) sk-b (horizontal ancho)
+              sk-c (vertical alto)   sk-d (mediano)
+              sk-e (horizontal peq) sk-f (panorámico)
+      Ejemplo:
+      <img src="images/sketch13.jpg" alt="" class="sk-item sk-a" loading="lazy" />
+    -->
+  </div>
+</section>
 
 
-/* ─── 7. LIGHTBOX ───────────────────────────────────────────────
-   Opens on click/tap of .sk-item (sketchbook images only).
-   Carousel cards are now full-screen — no lightbox needed for them.
-   Swipe left/right inside lightbox to navigate.
-────────────────────────────────────────────────────────────── */
-(function () {
-  var lb         = document.getElementById('lb');
-  var lbImg      = document.getElementById('lbImg');
-  var lbTitleEl  = document.getElementById('lbTitle');
-  var lbMetaEl   = document.getElementById('lbMeta');
-  var lbCloseBtn = document.getElementById('lbClose');
-  var lbPrevBtn  = document.getElementById('lbPrev');
-  var lbNextBtn  = document.getElementById('lbNext');
-  if (!lb || !lbImg) { return; }
+<!-- ═══════════════════════════════════════════
+     ACQUISITION MESSAGE
+═══════════════════════════════════════════ -->
+<div class="acquire-msg" id="acquire">
+  <p class="acquire-text"
+    data-es="Para adquirir alguna obra, envíame un DM o un correo."
+    data-en="To purchase a piece, send me a DM or an email.">
+    Para adquirir alguna obra, envíame un DM o un correo.
+  </p>
+</div>
 
-  var items = [];
-  var sketchEls = document.querySelectorAll('.sk-item');
-
-  for (var si = 0; si < sketchEls.length; si++) {
-    items.push({ src: sketchEls[si].src, title: '', medium: '' });
-  }
-
-  var current = 0;
-
-  function lbOpen(index) {
-    current = Math.max(0, Math.min(index, items.length - 1));
-    var item = items[current];
-    lbImg.style.opacity = '0';
-    lbImg.src = item.src;
-    lbImg.alt = item.title;
-    if (lbTitleEl) { lbTitleEl.textContent = item.title; }
-    if (lbMetaEl)  { lbMetaEl.textContent  = item.medium; }
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () { lbImg.style.opacity = ''; });
-    });
-  }
-
-  function lbClose() {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
-  }
-
-  function lbGo(dir) { lbOpen((current + dir + items.length) % items.length); }
-
-  /* Attach to sketchbook images */
-  var swipeDx = 0;
-  for (var sai = 0; sai < sketchEls.length; sai++) {
-    (function (index) {
-      var el = sketchEls[index];
-      el.style.cursor = 'pointer';
-      el.addEventListener('touchstart', function (e) {
-        swipeDx = e.touches[0].clientX;
-      }, { passive: true });
-      el.addEventListener('touchend', function (e) {
-        var dx = e.changedTouches[0].clientX - swipeDx;
-        if (Math.abs(dx) < 12) { e.preventDefault(); lbOpen(index); }
-      }, { passive: false });
-      el.addEventListener('click', function () { lbOpen(index); });
-    }(sai));
-  }
-
-  /* Lightbox controls */
-  function attachLbBtn(btn, fn) {
-    if (!btn) { return; }
-    btn.addEventListener('touchstart', function (e) { e.preventDefault(); fn(); }, { passive: false });
-    btn.addEventListener('click', fn);
-  }
-  attachLbBtn(lbCloseBtn, lbClose);
-  attachLbBtn(lbPrevBtn,  function () { lbGo(-1); });
-  attachLbBtn(lbNextBtn,  function () { lbGo(+1); });
-
-  lb.addEventListener('click', function (e) { if (e.target === lb) { lbClose(); } });
-
-  document.addEventListener('keydown', function (e) {
-    if (!lb.classList.contains('open')) { return; }
-    if (e.key === 'Escape')     { lbClose(); }
-    if (e.key === 'ArrowLeft')  { lbGo(-1); }
-    if (e.key === 'ArrowRight') { lbGo(+1); }
-  });
-
-  /* Swipe inside lightbox */
-  var lbTx = 0;
-  lb.addEventListener('touchstart', function (e) {
-    lbTx = e.touches[0].clientX;
-  }, { passive: true });
-  lb.addEventListener('touchend', function (e) {
-    var dx = e.changedTouches[0].clientX - lbTx;
-    if (Math.abs(dx) > 50) { lbGo(dx < 0 ? 1 : -1); }
-  }, { passive: true });
-}());
+<!-- ═══════════════════════════════════════════
+     CONTACT
+     Email:     ivanayus0o@outlook.com
+     Instagram: @ayus0o
+     (zeros are literal "0" characters, not "O")
+═══════════════════════════════════════════ -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <span class="section-eyebrow" data-es="Contacto" data-en="Contact">Contacto</span>
+    <div class="contact-links">
+      <a href="mailto:ivanayus0o@outlook.com" class="contact-link">
+        <span class="contact-label" data-es="Correo" data-en="Email">Correo</span>
+        <span class="contact-value zero-safe">ivanayus0o@outlook.com</span>
+      </a>
+      <a href="https://instagram.com/ayus0o" target="_blank" rel="noopener noreferrer" class="contact-link">
+        <span class="contact-label" data-es="Instagram" data-en="Instagram">Instagram</span>
+        <span class="contact-value zero-safe">@ayus0o</span>
+      </a>
+    </div>
+  </div>
+</section>
 
 
-/* ─── 8. LANGUAGE SWITCH ─────────────────────────────────────────
-   Toggles all data-es / data-en attributes across the page.
-   Default: Spanish. Toggle switches to English and back.
-   Prices: MXN ↔ USD at fixed rate of 17 MXN = 1 USD.
-────────────────────────────────────────────────────────────── */
-(function () {
-  var langToggle = document.getElementById('langToggle');
-  if (!langToggle) { return; }
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="footer">
+  <p class="footer-name">Ivan Ayuso</p>
+  <p class="footer-copy">© <span id="yr"></span></p>
+</footer>
 
-  var langEs  = langToggle.querySelector('.lang-es');
-  var langEn  = langToggle.querySelector('.lang-en');
-  var current = 'es'; /* default: Spanish */
 
-  function switchLang(lang) {
-    current = lang;
+<!-- ═══════════════════════════════════════════
+     LIGHTBOX
+═══════════════════════════════════════════ -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="View artwork">
+  <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
+  <button class="lb-prev"  id="lbPrev"  aria-label="Previous">←</button>
+  <button class="lb-next"  id="lbNext"  aria-label="Next">→</button>
+  <div class="lb-stage">
+    <img class="lb-img" id="lbImg" src="" alt="" />
+  </div>
+  <div class="lb-caption">
+    <p class="lb-title" id="lbTitle"></p>
+    <p class="lb-meta"  id="lbMeta"></p>
+  </div>
+</div>
 
-    /* Update toggle appearance */
-    if (lang === 'en') {
-      langEs.classList.remove('lang-active');
-      langEs.classList.add('lang-inactive');
-      langEn.classList.add('lang-active');
-      langEn.classList.remove('lang-inactive');
-      document.documentElement.lang = 'en';
-    } else {
-      langEn.classList.remove('lang-active');
-      langEn.classList.add('lang-inactive');
-      langEs.classList.add('lang-active');
-      langEs.classList.remove('lang-inactive');
-      document.documentElement.lang = 'es';
-    }
-
-    /* Switch all elements that have data-es and data-en */
-    var els = document.querySelectorAll('[data-es][data-en]');
-    for (var i = 0; i < els.length; i++) {
-      var el = els[i];
-      var val = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-es');
-      if (val !== null) {
-        el.textContent = val;
-      }
-    }
-
-    /* Switch nav link text separately (they have href so textContent = just text node) */
-    var navLinks = document.querySelectorAll('a[data-es][data-en]');
-    for (var j = 0; j < navLinks.length; j++) {
-      var a = navLinks[j];
-      a.textContent = lang === 'en' ? a.getAttribute('data-en') : a.getAttribute('data-es');
-    }
-  }
-
-  langToggle.addEventListener('click', function () {
-    switchLang(current === 'es' ? 'en' : 'es');
-  });
-
-  langToggle.addEventListener('touchstart', function (e) {
-    e.preventDefault();
-    switchLang(current === 'es' ? 'en' : 'es');
-  }, { passive: false });
-
-  /* Init — set ES as active */
-  langEs.classList.add('lang-active');
-  langEn.classList.add('lang-inactive');
-}());
+<script src="script.js"></script>
+</body>
+</html>
