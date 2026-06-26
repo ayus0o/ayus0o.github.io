@@ -16,10 +16,15 @@
 ═══════════════════════════════════════════ -->
 <nav class="nav" id="nav">
   <a class="nav-name" href="#top">Ivan Ayuso</a>
+  <button class="lang-toggle" id="langToggle" aria-label="Switch language">
+    <span class="lang-es lang-active">ES</span>
+    <span class="lang-divider">/</span>
+    <span class="lang-en">EN</span>
+  </button>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#works">Works</a></li>
-    <li><a href="#sketchbook">Sketchbook</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#works" data-es="Obras" data-en="Works">Obras</a></li>
+    <li><a href="#sketchbook" data-es="Bocetos" data-en="Sketchbook">Bocetos</a></li>
+    <li><a href="#contact" data-es="Contacto" data-en="Contact">Contacto</a></li>
   </ul>
   <button class="nav-burger" id="navBurger" aria-label="Abrir menú" aria-expanded="false">
     <span></span>
@@ -30,9 +35,9 @@
 <!-- Mobile menu overlay (separate from nav for z-index control) -->
 <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true">
   <ul class="mobile-links" id="mobileLinks">
-    <li><a href="#works">Works</a></li>
-    <li><a href="#sketchbook">Sketchbook</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#works" data-es="Obras" data-en="Works">Obras</a></li>
+    <li><a href="#sketchbook" data-es="Bocetos" data-en="Sketchbook">Bocetos</a></li>
+    <li><a href="#contact" data-es="Contacto" data-en="Contact">Contacto</a></li>
   </ul>
 </div>
 
@@ -48,16 +53,16 @@
   <div class="hero-body">
     <h1 class="hero-name">Ivan Ayuso</h1>
     <div class="hero-right">
-      <p class="hero-line">Proyecto mi psique</p>
+      <p class="hero-line" data-es="Proyecto mi psique" data-en="I project my psyche">Proyecto mi psique</p>
       <p class="hero-origin">El Paso · Ciudad Juárez</p>
     </div>
   </div>
   <div class="hero-bar">
-    <span>Works on Paper</span>
+    <span data-es="Obras en papel" data-en="Works on Paper">Obras en papel</span>
     <span>2024</span>
   </div>
   <a class="hero-down" href="#works" aria-label="Scroll down">
-    Scroll
+    <span data-es="Bajar" data-en="Scroll">Bajar</span>
     <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
       <line x1="7" y1="0" x2="7" y2="17" stroke="currentColor" stroke-width="1"/>
       <polyline points="2,12 7,18 12,12" fill="none" stroke="currentColor" stroke-width="1"/>
@@ -75,7 +80,7 @@
 ═══════════════════════════════════════════ -->
 <section class="works" id="works">
   <header class="works-header">
-    <span class="section-eyebrow">Selected Works</span>
+    <span class="section-eyebrow" data-es="Obras Seleccionadas" data-en="Selected Works">Obras Seleccionadas</span>
   </header>
 
   <div class="carousel-outer" id="carousel">
@@ -88,14 +93,18 @@
         data-medium="Acuarela sobre papel · 50 × 35 cm">
         <figcaption class="card-cap">
           <span class="card-title">Sentencia</span>
-          <span class="card-desc">Three cowboys stop to look at the viewer as if gossiping something. This work is meant to express how masculinity can be a judging and conditional thing.</span>
+          <span class="card-desc" data-es="Tres vaqueros se detienen a mirar al espectador como si estuvieran chismeando algo. Esta obra busca expresar cómo la masculinidad puede ser algo que juzga y condiciona." data-en="Three cowboys stop to look at the viewer as if gossiping something. This work is meant to express how masculinity can be a judging and conditional thing.">Tres vaqueros se detienen a mirar al espectador como si estuvieran chismeando algo. Esta obra busca expresar cómo la masculinidad puede ser algo que juzga y condiciona.</span>
         </figcaption>
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2026</span>
-            <span class="card-medium">Acuarela sobre papel · 50 × 35 cm</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 50 × 35 cm"
+              data-en="Watercolor on paper · 50 × 35 cm">Acuarela sobre papel · 50 × 35 cm</span>
           </div>
-          <span class="card-price">$1,500 MXN</span>
+          <span class="card-price"
+            data-es="$1,500 MXN"
+            data-en="$88 USD">$1,500 MXN</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork1.jpg" alt="Sentencia" loading="lazy" />
@@ -109,14 +118,18 @@
         data-medium="Acuarela, gises y tinta negra sobre papel · 35 × 50 cm">
         <figcaption class="card-cap">
           <span class="card-title">Mi amor</span>
-          <span class="card-desc">This piece was done from a visit to an art exhibition with Regina Vazquez as the protagonist of the painting. She is my love.</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada durante una visita a una exposición de arte con Regina Vázquez como protagonista de la pintura. Ella es mi amor." data-en="This piece was done from a visit to an art exhibition with Regina Vazquez as the protagonist of the painting. She is my love.">Esta pieza fue realizada durante una visita a una exposición de arte con Regina Vázquez como protagonista de la pintura. Ella es mi amor.</span>
         </figcaption>
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2026</span>
-            <span class="card-medium">Acuarela, gises y tinta negra sobre papel · 35 × 50 cm</span>
+            <span class="card-medium"
+              data-es="Acuarela, gises y tinta negra sobre papel · 35 × 50 cm"
+              data-en="Watercolor, chalk and black ink on paper · 35 × 50 cm">Acuarela, gises y tinta negra sobre papel · 35 × 50 cm</span>
           </div>
-          <span class="card-price card-price--nfs">Not for sale</span>
+          <span class="card-price card-price--nfs"
+            data-es="No está a la venta"
+            data-en="Not for sale">No está a la venta</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork2.jpg" alt="Mi amor" loading="lazy" />
@@ -134,9 +147,13 @@
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2025</span>
-            <span class="card-medium">Acuarela sobre papel · 43 × 35 cm</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 43 × 35 cm"
+              data-en="Watercolor on paper · 43 × 35 cm">Acuarela sobre papel · 43 × 35 cm</span>
           </div>
-          <span class="card-price">$700 MXN</span>
+          <span class="card-price"
+            data-es="$700 MXN"
+            data-en="$41 USD">$700 MXN</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork3.jpg" alt="Reparo" loading="lazy" />
@@ -150,14 +167,18 @@
         data-medium="Acuarela sobre papel · 50 × 25 cm">
         <figcaption class="card-cap">
           <span class="card-title">Bruma</span>
-          <span class="card-desc">The colors and appearance of this picture is meant to portrait mexican beauty. I like to think that in my own world where the water is clean and people can smoke inside the park of Juarez Mexico; this painting exists.</span>
+          <span class="card-desc" data-es="Los colores y la apariencia de esta imagen buscan retratar la belleza mexicana. Me gusta pensar que en mi propio mundo, donde el agua está limpia y la gente puede fumar en el parque de Juárez, México, esta pintura existe." data-en="The colors and appearance of this picture is meant to portrait mexican beauty. I like to think that in my own world where the water is clean and people can smoke inside the park of Juarez Mexico; this painting exists.">Los colores y la apariencia de esta imagen buscan retratar la belleza mexicana. Me gusta pensar que en mi propio mundo, donde el agua está limpia y la gente puede fumar en el parque de Juárez, México, esta pintura existe.</span>
         </figcaption>
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2026</span>
-            <span class="card-medium">Acuarela sobre papel · 50 × 25 cm</span>
+            <span class="card-medium"
+              data-es="Acuarela sobre papel · 50 × 25 cm"
+              data-en="Watercolor on paper · 50 × 25 cm">Acuarela sobre papel · 50 × 25 cm</span>
           </div>
-          <span class="card-price">$1,500 MXN</span>
+          <span class="card-price"
+            data-es="$1,500 MXN"
+            data-en="$88 USD">$1,500 MXN</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork5.jpg" alt="Bruma" loading="lazy" />
@@ -171,14 +192,18 @@
         data-medium="Tinta azul sobre cartón · 76 × 52 cm">
         <figcaption class="card-cap">
           <span class="card-title">Sin título</span>
-          <span class="card-desc">This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez." data-en="This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.">Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez.</span>
         </figcaption>
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2024</span>
-            <span class="card-medium">Tinta azul sobre cartón · 76 × 52 cm</span>
+            <span class="card-medium"
+              data-es="Tinta azul sobre cartón · 76 × 52 cm"
+              data-en="Blue ink on cardboard · 76 × 52 cm">Tinta azul sobre cartón · 76 × 52 cm</span>
           </div>
-          <span class="card-price">$650 MXN</span>
+          <span class="card-price"
+            data-es="$650 MXN"
+            data-en="$38 USD">$650 MXN</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork8.jpg" alt="Sin título" loading="lazy" />
@@ -196,9 +221,13 @@
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2026</span>
-            <span class="card-medium">Carbón y gis sobre papel · 70 × 50 cm</span>
+            <span class="card-medium"
+              data-es="Carbón y gis sobre papel · 70 × 50 cm"
+              data-en="Charcoal and chalk on paper · 70 × 50 cm">Carbón y gis sobre papel · 70 × 50 cm</span>
           </div>
-          <span class="card-price card-price--sold">Sold</span>
+          <span class="card-price card-price--sold"
+            data-es="Vendido"
+            data-en="Sold">Vendido</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork9.jpg" alt="Distancia" loading="lazy" />
@@ -212,38 +241,162 @@
         data-medium="Tinta azul sobre cartón · 76 × 51 cm">
         <figcaption class="card-cap">
           <span class="card-title">Sin título</span>
-          <span class="card-desc">This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.</span>
+          <span class="card-desc" data-es="Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez." data-en="This piece was done solely with a blue pen on a piece of cardboard for an exhibition I had on winter of 2024 downtown Juárez.">Esta pieza fue realizada únicamente con un bolígrafo azul sobre un trozo de cartón para una exposición que tuve en el invierno de 2024 en el centro de Juárez.</span>
         </figcaption>
         <div class="card-footer">
           <div class="card-footer-left">
             <span class="card-year">2024</span>
-            <span class="card-medium">Tinta azul sobre cartón · 76 × 51 cm</span>
+            <span class="card-medium"
+              data-es="Tinta azul sobre cartón · 76 × 51 cm"
+              data-en="Blue ink on cardboard · 76 × 51 cm">Tinta azul sobre cartón · 76 × 51 cm</span>
           </div>
-          <span class="card-price">$650 MXN</span>
+          <span class="card-price"
+            data-es="$650 MXN"
+            data-en="$38 USD">$650 MXN</span>
         </div>
         <div class="card-img-wrap">
           <img src="images/artwork10.jpg" alt="Sin título" loading="lazy" />
         </div>
       </figure>
 
+      <!-- ARTWORK 8 — Mujer -->
+      <figure class="card" data-orient="landscape"
+        data-title="Mujer"
+        data-year="2026"
+        data-medium="Carbón sobre papel · 50 × 35 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Mujer</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 50 × 35 cm"
+              data-en="Charcoal on paper · 50 × 35 cm">Carbón sobre papel · 50 × 35 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$1,000 MXN"
+            data-en="$59 USD">$1,000 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork12.jpg" alt="Mujer" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 9 — Marilyn -->
+      <figure class="card" data-orient="portrait"
+        data-title="Marilyn"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Marilyn</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$600 MXN"
+            data-en="$35 USD">$600 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork13.jpg" alt="Marilyn" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 10 — Salvación -->
+      <figure class="card" data-orient="landscape"
+        data-title="Salvación"
+        data-year="2026"
+        data-medium="Carbón sobre papel · 54 × 47 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Salvación</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2026</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 54 × 47 cm"
+              data-en="Charcoal on paper · 54 × 47 cm">Carbón sobre papel · 54 × 47 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$850 MXN"
+            data-en="$50 USD">$850 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork14.jpg" alt="Salvación" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 11 — Sin título -->
+      <figure class="card" data-orient="portrait"
+        data-title="Sin título"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$700 MXN"
+            data-en="$41 USD">$700 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork15.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
+      <!-- ARTWORK 12 — Sin título -->
+      <figure class="card" data-orient="portrait"
+        data-title="Sin título"
+        data-year="2025"
+        data-medium="Carbón sobre papel · 28 × 38 cm">
+        <figcaption class="card-cap">
+          <span class="card-title">Sin título</span>
+        </figcaption>
+        <div class="card-footer">
+          <div class="card-footer-left">
+            <span class="card-year">2025</span>
+            <span class="card-medium"
+              data-es="Carbón sobre papel · 28 × 38 cm"
+              data-en="Charcoal on paper · 28 × 38 cm">Carbón sobre papel · 28 × 38 cm</span>
+          </div>
+          <span class="card-price"
+            data-es="$600 MXN"
+            data-en="$35 USD">$600 MXN</span>
+        </div>
+        <div class="card-img-wrap">
+          <img src="images/artwork16.jpg" alt="Sin título" loading="lazy" />
+        </div>
+      </figure>
+
       <!--
-        ADD MORE ARTWORKS HERE — copy this block:
+        ADD MORE ARTWORKS HERE:
         <figure class="card" data-orient="portrait"
-          data-title="Title" data-year="2024"
-          data-medium="Medium · W × H cm">
+          data-title="Título" data-year="2024"
+          data-medium="Técnica · W × H cm">
           <figcaption class="card-cap">
-            <span class="card-title">Title</span>
-            <span class="card-desc">Description.</span>
+            <span class="card-title">Título</span>
+            <span class="card-desc" data-es="Descripción ES." data-en="Description EN.">Descripción ES.</span>
           </figcaption>
           <div class="card-footer">
             <div class="card-footer-left">
               <span class="card-year">2024</span>
-              <span class="card-medium">Medium · W × H cm</span>
+              <span class="card-medium" data-es="Técnica · W × H cm" data-en="Technique · W × H cm">Técnica · W × H cm</span>
             </div>
-            <span class="card-price">$000 MXN</span>
+            <span class="card-price" data-es="$000 MXN" data-en="$00 USD">$000 MXN</span>
           </div>
           <div class="card-img-wrap">
-            <img src="images/artworkN.jpg" alt="Title" loading="lazy" />
+            <img src="images/artworkN.jpg" alt="Título" loading="lazy" />
           </div>
         </figure>
       -->
@@ -274,8 +427,8 @@
 ═══════════════════════════════════════════ -->
 <section class="sketchbook" id="sketchbook">
   <header class="sketchbook-header">
-    <span class="section-eyebrow">Sketchbook</span>
-    <p class="sketchbook-note">Pages, studies, unfinished thoughts.</p>
+    <span class="section-eyebrow" data-es="Bocetos" data-en="Sketchbook">Bocetos</span>
+    <p class="sketchbook-note" data-es="Páginas, estudios, pensamientos inconclusos." data-en="Pages, studies, unfinished thoughts.">Páginas, estudios, pensamientos inconclusos.</p>
   </header>
   <div class="sketchbook-collage">
     <img src="images/sketch1.jpg"  alt="" class="sk-item sk-b" loading="lazy" />
@@ -310,14 +463,14 @@
 ═══════════════════════════════════════════ -->
 <section class="contact" id="contact">
   <div class="contact-inner">
-    <span class="section-eyebrow">Contact</span>
+    <span class="section-eyebrow" data-es="Contacto" data-en="Contact">Contacto</span>
     <div class="contact-links">
       <a href="mailto:ivanayus0o@outlook.com" class="contact-link">
-        <span class="contact-label">Email</span>
+        <span class="contact-label" data-es="Correo" data-en="Email">Correo</span>
         <span class="contact-value zero-safe">ivanayus0o@outlook.com</span>
       </a>
       <a href="https://instagram.com/ayus0o" target="_blank" rel="noopener noreferrer" class="contact-link">
-        <span class="contact-label">Instagram</span>
+        <span class="contact-label" data-es="Instagram" data-en="Instagram">Instagram</span>
         <span class="contact-value zero-safe">@ayus0o</span>
       </a>
     </div>
