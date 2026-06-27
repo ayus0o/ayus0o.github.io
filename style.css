@@ -684,27 +684,25 @@ button {
 }
 
 /*
-  Dense masonry-like grid.
-  6 columns, images use natural height (no fixed row height).
-  overflow:hidden on each image prevents any gap from aspect ratio.
+  SKETCHBOOK COLLAGE — puzzle layout
+  4-column grid, each class gets a UNIQUE aspect ratio so
+  images tile like puzzle pieces. No uniform squares.
+  object-fit: cover fills each cell edge to edge.
 */
 .sketchbook-collage {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-auto-rows: auto;
-  gap: 2px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
   background: var(--black);
-  padding: 2px;
+  padding: 3px;
 }
 
 .sk-item {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;       /* cover = no whitespace inside each cell */
-  aspect-ratio: 1 / 1;    /* square cells — tight, uniform, no gaps */
+  object-fit: cover;
   cursor: pointer;
-  opacity: 0.82;
+  opacity: 0.85;
   transition: transform 0.3s var(--ease-out), opacity 0.25s linear;
   transform-origin: center;
   position: relative;
@@ -712,18 +710,27 @@ button {
 }
 
 .sk-item:hover {
-  transform: scale(1.06);
+  transform: scale(1.04);
   opacity: 1;
   z-index: 10;
 }
 
-/* Size variants — some span 2 cols for variety */
-.sk-a { grid-column: span 2; aspect-ratio: 2 / 1; }
-.sk-b { grid-column: span 1; aspect-ratio: 1 / 1; }
-.sk-c { grid-column: span 1; aspect-ratio: 1 / 1; }
-.sk-d { grid-column: span 2; aspect-ratio: 2 / 1; }
-.sk-e { grid-column: span 1; aspect-ratio: 1 / 1; }
-.sk-f { grid-column: span 2; aspect-ratio: 2 / 1; }
+/*
+  Puzzle pieces — each class has a different col span + aspect ratio.
+  Together they fill rows without gaps, like interlocking pieces.
+  4-column grid total per row.
+
+  Row 1: sk-b(1col 3:4) + sk-f(2col 16:9) + sk-c(1col 3:4)  = 4cols
+  Row 2: sk-a(2col 4:3) + sk-d(2col 4:3)                     = 4cols
+  Row 3: sk-e(1col 1:1) + sk-b(1col 3:4) + sk-a(2col 4:3)   = 4cols
+  ...pattern repeats
+*/
+.sk-a { grid-column: span 2; aspect-ratio: 4 / 3;  }
+.sk-b { grid-column: span 1; aspect-ratio: 3 / 4;  }
+.sk-c { grid-column: span 1; aspect-ratio: 3 / 4;  }
+.sk-d { grid-column: span 2; aspect-ratio: 4 / 3;  }
+.sk-e { grid-column: span 1; aspect-ratio: 1 / 1;  }
+.sk-f { grid-column: span 2; aspect-ratio: 16 / 9; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -963,9 +970,13 @@ button {
   .about-text { padding: 2.5rem var(--gutter); }
   .sketchbook-scatter { columns: 2; }
 
-  .sketchbook-collage { grid-template-columns: repeat(4, 1fr); }
-  .sk-a, .sk-d, .sk-f { grid-column: span 2; aspect-ratio: 2 / 1; }
-  .sk-b, .sk-c, .sk-e { grid-column: span 1; aspect-ratio: 1 / 1; }
+  .sketchbook-collage { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+  .sk-a { grid-column: span 2; aspect-ratio: 4 / 3; }
+  .sk-b { grid-column: span 1; aspect-ratio: 3 / 4; }
+  .sk-c { grid-column: span 1; aspect-ratio: 3 / 4; }
+  .sk-d { grid-column: span 2; aspect-ratio: 4 / 3; }
+  .sk-e { grid-column: span 1; aspect-ratio: 1 / 1; }
+  .sk-f { grid-column: span 2; aspect-ratio: 16 / 9; }
 }
 
 
@@ -987,8 +998,13 @@ button {
 
   .sketchbook-scatter { columns: 1; }
 
-  .sketchbook-collage { grid-template-columns: repeat(3, 1fr); gap: 2px; }
-  .sk-a, .sk-b, .sk-c, .sk-d, .sk-e, .sk-f { grid-column: span 1; aspect-ratio: 1 / 1; }
+  .sketchbook-collage { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+  .sk-a { grid-column: span 2; aspect-ratio: 16 / 9; }
+  .sk-b { grid-column: span 1; aspect-ratio: 3 / 4; }
+  .sk-c { grid-column: span 1; aspect-ratio: 3 / 4; }
+  .sk-d { grid-column: span 2; aspect-ratio: 16 / 9; }
+  .sk-e { grid-column: span 1; aspect-ratio: 1 / 1; }
+  .sk-f { grid-column: span 2; aspect-ratio: 16 / 9; }
 
   .lb-caption { flex-direction: column; gap: 0.3rem; }
 }
